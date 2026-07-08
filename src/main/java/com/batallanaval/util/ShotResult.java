@@ -5,8 +5,8 @@ import java.io.Serializable;
 /**
  * Resultado inmediato de haber disparado sobre una coordenada del tablero.
  */
-public enum ResultadoDisparo implements Serializable {
-    AGUA,
-    TOCADO,
-    HUNDIDO
+public enum ShotResult implements Serializable {
+    WATER,
+    HIT,
+    SUNK
 }

@@ -18,9 +18,9 @@
             <Label text="Batalla Naval" style="-fx-font-size: 24px; -fx-font-weight: bold;" />
             <Label fx:id="statusLabel" text="Coloca tu flota" />
             <HBox alignment="CENTER" spacing="10.0">
-                <Button text="Girar barco" onAction="#onGirarBarco" />
-                <Button text="Colocar flota aleatoria" onAction="#onColocarAleatorio" />
-                <Button text="Ver tablero enemigo" onAction="#onVerTableroEnemigo" />
+                <Button text="Girar barco (R)" onAction="#onRotateShip" />
+                <Button text="Colocar flota aleatoria" onAction="#onPlaceRandomFleet" />
+                <Button text="Ver tablero enemigo" onAction="#onToggleVerification" />
             </HBox>
         </VBox>
     </top>

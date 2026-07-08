@@ -7,9 +7,9 @@ package com.batallanaval.exception;
  * deberia permitir seleccionar esa celda en primer lugar), no una condicion
  * de negocio que siempre haya que manejar explicitamente.
  */
-public class DisparoInvalidoException extends RuntimeException {
+public class InvalidShotException extends RuntimeException {
 
-    public DisparoInvalidoException(String mensaje) {
-        super(mensaje);
+    public InvalidShotException(String message) {
+        super(message);
     }
 }

@@ -8,7 +8,7 @@ public class HumanPlayer extends Player {
 
     private static final long serialVersionUID = 1L;
 
-    public HumanPlayer(String nickname, Board tableroDePosicion) {
-        super(nickname, tableroDePosicion);
+    public HumanPlayer(String nickname, Board positionBoard) {
+        super(nickname, positionBoard);
     }
 }

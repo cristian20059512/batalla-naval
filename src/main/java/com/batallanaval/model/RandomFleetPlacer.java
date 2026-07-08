@@ -1,8 +1,8 @@
 package com.batallanaval.model;
 
-import com.batallanaval.exception.ColocacionInvalidaException;
-import com.batallanaval.util.Coordenada;
-import com.batallanaval.util.Orientacion;
+import com.batallanaval.exception.InvalidPlacementException;
+import com.batallanaval.util.Coordinate;
+import com.batallanaval.util.Orientation;
 
 import java.util.List;
 import java.util.Random;
@@ -16,39 +16,40 @@ import java.util.Random;
  */
 public final class RandomFleetPlacer {
 
-    private static final int INTENTOS_MAXIMOS_POR_BARCO = 500;
+    private static final int MAX_ATTEMPTS_PER_SHIP = 500;
 
     private RandomFleetPlacer() {
         // clase de utilidad, no se instancia
     }
 
-    public static Fleet colocarFlotaAleatoria(Board tablero) {
-        List<Ship> barcos = ShipFactory.crearFlotaCompleta();
+    public static Fleet placeRandomFleet(Board board) {
+        List<Ship> ships = ShipFactory.createFullFleet();
         Random random = new Random();
 
-        for (Ship barco : barcos) {
-            boolean colocado = false;
-            for (int intento = 0; intento < INTENTOS_MAXIMOS_POR_BARCO && !colocado; intento++) {
-                Orientacion orientacion = random.nextBoolean() ? Orientacion.HORIZONTAL : Orientacion.VERTICAL;
-                Coordenada inicio = new Coordenada(
-                        random.nextInt(Board.TAMANIO),
-                        random.nextInt(Board.TAMANIO));
+        for (Ship ship : ships) {
+            boolean placed = false;
+            for (int attempt = 0; attempt < MAX_ATTEMPTS_PER_SHIP && !placed; attempt++) {
+                Orientation[] orientations = Orientation.values();
+                Orientation orientation = orientations[random.nextInt(orientations.length)];
+                Coordinate start = new Coordinate(
+                        random.nextInt(Board.SIZE),
+                        random.nextInt(Board.SIZE));
                 try {
-                    tablero.colocarBarco(barco, inicio, orientacion);
-                    colocado = true;
-                } catch (ColocacionInvalidaException e) {
+                    board.placeShip(ship, start, orientation);
+                    placed = true;
+                } catch (InvalidPlacementException e) {
                     // coordenada invalida o superpuesta: se reintenta con otra al azar
                 }
             }
-            if (!colocado) {
+            if (!placed) {
                 throw new IllegalStateException(
-                        "No se pudo colocar el barco " + barco.getNombre() + " tras "
-                                + INTENTOS_MAXIMOS_POR_BARCO + " intentos.");
+                        "No se pudo colocar el barco " + ship.getName() + " tras "
+                                + MAX_ATTEMPTS_PER_SHIP + " intentos.");
             }
         }
 
-        Fleet flota = new Fleet(barcos);
-        tablero.setFlota(flota);
-        return flota;
+        Fleet fleet = new Fleet(ships);
+        board.setFleet(fleet);
+        return fleet;
     }
 }

@@ -6,13 +6,13 @@ package com.batallanaval.exception;
  * Es checked porque el llamador (la vista/controlador) SIEMPRE debe decidir
  * que hacer ante una colocacion invalida, no es un error de programacion.
  */
-public class ColocacionInvalidaException extends Exception {
+public class InvalidPlacementException extends Exception {
 
-    public ColocacionInvalidaException(String mensaje) {
-        super(mensaje);
+    public InvalidPlacementException(String message) {
+        super(message);
     }
 
-    public ColocacionInvalidaException(String mensaje, Throwable causa) {
-        super(mensaje, causa);
+    public InvalidPlacementException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

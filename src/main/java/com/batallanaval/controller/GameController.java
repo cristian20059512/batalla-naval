@@ -1,9 +1,9 @@
 package com.batallanaval.controller;
 
-import com.batallanaval.ai.RandomShootingStrategy;
-import com.batallanaval.exception.ColocacionInvalidaException;
-import com.batallanaval.exception.DisparoInvalidoException;
-import com.batallanaval.exception.PersistenciaException;
+import com.batallanaval.ai.HuntTargetShootingStrategy;
+import com.batallanaval.exception.InvalidPlacementException;
+import com.batallanaval.exception.InvalidShotException;
+import com.batallanaval.exception.PersistenceException;
 import com.batallanaval.model.Board;
 import com.batallanaval.model.HumanPlayer;
 import com.batallanaval.model.MachinePlayer;
@@ -11,16 +11,16 @@ import com.batallanaval.model.RandomFleetPlacer;
 import com.batallanaval.model.Ship;
 import com.batallanaval.model.ShipFactory;
 import com.batallanaval.model.Shot;
-import com.batallanaval.persistence.EstadoPartida;
+import com.batallanaval.persistence.GameState;
 import com.batallanaval.persistence.GamePersistenceManager;
-import com.batallanaval.persistence.ResumenPartida;
-import com.batallanaval.util.Coordenada;
-import com.batallanaval.util.FaseJuego;
-import com.batallanaval.util.Orientacion;
-import com.batallanaval.util.ResultadoDisparo;
-import com.batallanaval.util.SesionJuego;
-import com.batallanaval.util.TipoBarco;
-import com.batallanaval.util.TurnoJuego;
+import com.batallanaval.persistence.GameSummary;
+import com.batallanaval.util.Coordinate;
+import com.batallanaval.util.GamePhase;
+import com.batallanaval.util.Orientation;
+import com.batallanaval.util.ShotResult;
+import com.batallanaval.util.GameSession;
+import com.batallanaval.util.ShipType;
+import com.batallanaval.util.GameTurn;
 import com.batallanaval.view.BoardView;
 
 import javafx.animation.PauseTransition;
@@ -45,45 +45,47 @@ public class GameController {
 
     private static final Logger LOG = Logger.getLogger(GameController.class.getName());
 
-    private final Board tableroPosicionHumano = new Board();
-    private final Board tableroPrincipalMaquina = new Board();
+    private final Board humanPositionBoard = new Board();
+    private final Board machineMainBoard = new Board();
 
-    private final BoardView vistaPosicion;
-    private final BoardView vistaPrincipal;
+    private final BoardView positionView;
+    private final BoardView mainView;
     private final Label statusLabel;
 
-    private final GamePersistenceManager persistencia = new GamePersistenceManager();
+    private final GamePersistenceManager persistenceManager = new GamePersistenceManager();
 
-    private HumanPlayer humano;
-    private MachinePlayer maquina;
+    private HumanPlayer human;
+    private MachinePlayer machine;
 
-    private FaseJuego fase = FaseJuego.COLOCACION;
-    private TurnoJuego turno = TurnoJuego.HUMANO;
+    private GamePhase phase = GamePhase.PLACEMENT;
+    private GameTurn turn = GameTurn.HUMAN;
 
-    private final List<TipoBarco> colaColocacion = new ArrayList<>();
-    private Orientacion orientacionActual = Orientacion.HORIZONTAL;
-    private boolean modoVerificacion = false;
+    private final List<ShipType> placementQueue = new ArrayList<>();
+    private Orientation currentOrientation = Orientation.RIGHT;
+    private boolean verificationMode = false;
 
-    public GameController(Pane contenedorPosicion, Pane contenedorPrincipal, Label statusLabel) {
+    public GameController(Pane positionContainer, Pane mainContainer, Label statusLabel) {
         this.statusLabel = statusLabel;
 
-        vistaPosicion = new BoardView(tableroPosicionHumano, true);
-        vistaPrincipal = new BoardView(tableroPrincipalMaquina, false);
+        positionView = new BoardView(humanPositionBoard, true);
+        mainView = new BoardView(machineMainBoard, false);
 
-        contenedorPosicion.getChildren().add(vistaPosicion.getNodo());
-        contenedorPrincipal.getChildren().add(vistaPrincipal.getNodo());
+        positionContainer.getChildren().add(positionView.getNode());
+        mainContainer.getChildren().add(mainView.getNode());
 
-        tableroPosicionHumano.agregarListener(vistaPosicion);
-        tableroPrincipalMaquina.agregarListener(vistaPrincipal);
+        humanPositionBoard.addListener(positionView);
+        machineMainBoard.addListener(mainView);
 
-        vistaPosicion.setOnCeldaClic(this::onClickTableroPosicion);
-        vistaPrincipal.setOnCeldaClic(this::onClickTableroPrincipal);
+        positionView.setOnCellClick(this::onPositionBoardClick);
+        positionView.setOnCellHoverEnter(this::onPositionBoardHover);
+        positionView.setOnCellHoverExit(coordinate -> positionView.clearPreview());
+        mainView.setOnCellClick(this::onMainBoardClick);
 
-        if (persistencia.existePartidaGuardada()) {
-            cargarPartidaGuardada();
+        if (persistenceManager.hasSavedGame()) {
+            loadSavedGame();
         } else {
-            prepararColaDeColocacion();
-            actualizarStatusColocacion();
+            preparePlacementQueue();
+            updatePlacementStatus();
         }
     }
 
@@ -93,46 +95,46 @@ public class GameController {
      * de los tableros ya construidos (para no invalidar los listeners de
      * la vista) y retoma fase/turno/cola de colocacion tal como quedaron.
      */
-    private void cargarPartidaGuardada() {
+    private void loadSavedGame() {
         try {
-            EstadoPartida estado = persistencia.cargarEstado();
-            ResumenPartida resumen = persistencia.cargarResumen();
+            GameState state = persistenceManager.loadState();
+            GameSummary summary = persistenceManager.loadSummary();
 
-            tableroPosicionHumano.restaurarEstado(estado.getTableroPosicionHumano());
-            tableroPrincipalMaquina.restaurarEstado(estado.getTableroPrincipalMaquina());
+            humanPositionBoard.restoreState(state.getHumanPositionBoard());
+            machineMainBoard.restoreState(state.getMachineMainBoard());
 
-            fase = estado.getFase();
-            turno = estado.getTurno();
-            colaColocacion.clear();
-            colaColocacion.addAll(estado.getColaColocacion());
-            orientacionActual = estado.getOrientacionActual();
-            modoVerificacion = estado.isModoVerificacion();
+            phase = state.getPhase();
+            turn = state.getTurn();
+            placementQueue.clear();
+            placementQueue.addAll(state.getPlacementQueue());
+            currentOrientation = state.getCurrentOrientation();
+            verificationMode = state.isVerificationMode();
 
-            vistaPosicion.redibujarTodo();
-            vistaPrincipal.setModoVerificacion(modoVerificacion);
+            positionView.redrawAll();
+            mainView.setVerificationMode(verificationMode);
 
-            if (fase == FaseJuego.COLOCACION) {
-                actualizarStatusColocacion();
+            if (phase == GamePhase.PLACEMENT) {
+                updatePlacementStatus();
                 return;
             }
 
-            humano = new HumanPlayer(resumen.getNicknameHumano(), tableroPosicionHumano);
-            maquina = new MachinePlayer(resumen.getNicknameMaquina(), tableroPrincipalMaquina,
-                    new RandomShootingStrategy());
+            human = new HumanPlayer(summary.getHumanNickname(), humanPositionBoard);
+            machine = new MachinePlayer(summary.getMachineNickname(), machineMainBoard,
+                    new HuntTargetShootingStrategy());
 
-            if (fase == FaseJuego.FIN) {
+            if (phase == GamePhase.FINISHED) {
                 statusLabel.setText("Partida cargada: la partida ya habia finalizado.");
             } else {
-                statusLabel.setText("Partida cargada. Turno: " + turno);
-                if (turno == TurnoJuego.MAQUINA) {
-                    pausarYLuego(this::turnoMaquina);
+                statusLabel.setText("Partida cargada. Turno: " + turn);
+                if (turn == GameTurn.MACHINE) {
+                    pauseThen(this::machineTurn);
                 }
             }
-        } catch (PersistenciaException e) {
+        } catch (PersistenceException e) {
             LOG.log(Level.WARNING, "No se pudo cargar la partida guardada, se inicia una nueva.", e);
             statusLabel.setText("No se pudo cargar la partida guardada, se inicia una nueva.");
-            prepararColaDeColocacion();
-            actualizarStatusColocacion();
+            preparePlacementQueue();
+            updatePlacementStatus();
         }
     }
 
@@ -143,157 +145,189 @@ public class GameController {
      * cambia de estado. Un fallo de E/S no debe interrumpir el juego, solo
      * se registra en el log.
      */
-    private void autoguardar() {
-        EstadoPartida estado = new EstadoPartida(tableroPosicionHumano, tableroPrincipalMaquina, fase, turno,
-                colaColocacion, orientacionActual, modoVerificacion);
-        ResumenPartida resumen = new ResumenPartida(
-                humano != null ? humano.getNickname() : "Jugador",
-                maquina != null ? maquina.getNickname() : "Maquina",
-                tableroPosicionHumano.getFlota() != null
-                        ? (int) tableroPosicionHumano.getFlota().contarBarcosHundidos() : 0,
-                tableroPosicionHumano.getFlota() != null ? tableroPosicionHumano.getFlota().getTotalBarcos() : 0,
-                tableroPrincipalMaquina.getFlota() != null
-                        ? (int) tableroPrincipalMaquina.getFlota().contarBarcosHundidos() : 0,
-                tableroPrincipalMaquina.getFlota() != null ? tableroPrincipalMaquina.getFlota().getTotalBarcos() : 0);
+    private void autoSave() {
+        GameState state = new GameState(humanPositionBoard, machineMainBoard, phase, turn,
+                placementQueue, currentOrientation, verificationMode);
+        GameSummary summary = new GameSummary(
+                human != null ? human.getNickname() : "Jugador",
+                machine != null ? machine.getNickname() : "Maquina",
+                humanPositionBoard.getFleet() != null
+                        ? (int) humanPositionBoard.getFleet().countSunkShips() : 0,
+                humanPositionBoard.getFleet() != null ? humanPositionBoard.getFleet().getTotalShips() : 0,
+                machineMainBoard.getFleet() != null
+                        ? (int) machineMainBoard.getFleet().countSunkShips() : 0,
+                machineMainBoard.getFleet() != null ? machineMainBoard.getFleet().getTotalShips() : 0);
         try {
-            persistencia.guardarPartida(estado, resumen);
-        } catch (PersistenciaException e) {
+            persistenceManager.saveGame(state, summary);
+        } catch (PersistenceException e) {
             LOG.log(Level.WARNING, "No se pudo guardar la partida automaticamente.", e);
         }
     }
 
-    private void prepararColaDeColocacion() {
-        for (TipoBarco tipo : TipoBarco.values()) {
-            for (int i = 0; i < tipo.getCantidadEnFlota(); i++) {
-                colaColocacion.add(tipo);
+    private void preparePlacementQueue() {
+        for (ShipType type : ShipType.values()) {
+            for (int i = 0; i < type.getCountInFleet(); i++) {
+                placementQueue.add(type);
             }
         }
     }
 
-    /** Invocado por el boton "Girar barco": alterna horizontal/vertical antes de colocar. */
-    public void alternarOrientacion() {
-        orientacionActual = orientacionActual == Orientacion.HORIZONTAL
-                ? Orientacion.VERTICAL
-                : Orientacion.HORIZONTAL;
-        if (fase == FaseJuego.COLOCACION) {
-            actualizarStatusColocacion();
+    /**
+     * Invocado por el boton "Girar barco" (o la tecla R): rota la
+     * orientacion 90 grados en sentido horario cada vez (derecha, abajo,
+     * izquierda, arriba, y vuelve a derecha), para poder apuntar el barco
+     * hacia cualquiera de los 4 lados antes de colocarlo.
+     */
+    public void toggleOrientation() {
+        Orientation[] orientations = Orientation.values();
+        int nextIndex = (currentOrientation.ordinal() + 1) % orientations.length;
+        currentOrientation = orientations[nextIndex];
+        if (phase == GamePhase.PLACEMENT) {
+            updatePlacementStatus();
+            positionView.clearPreview();
         }
     }
 
     /** Invocado por el boton "Ver tablero enemigo": modo de verificacion (HU-3). */
-    public void alternarVerificacion() {
-        modoVerificacion = !modoVerificacion;
-        vistaPrincipal.setModoVerificacion(modoVerificacion);
+    public void toggleVerification() {
+        verificationMode = !verificationMode;
+        mainView.setVerificationMode(verificationMode);
     }
 
     /** Invocado por el boton "Colocar flota aleatoria": atajo para no colocar barco por barco. */
-    public void colocarFlotaAleatoria() {
-        if (fase != FaseJuego.COLOCACION) {
+    public void placeRandomFleet() {
+        if (phase != GamePhase.PLACEMENT) {
             return;
         }
-        colaColocacion.clear();
-        RandomFleetPlacer.colocarFlotaAleatoria(tableroPosicionHumano);
-        vistaPosicion.redibujarTodo();
-        comenzarFaseDeJuego();
+        placementQueue.clear();
+        RandomFleetPlacer.placeRandomFleet(humanPositionBoard);
+        positionView.redrawAll();
+        startGamePhase();
     }
 
-    private void onClickTableroPosicion(Coordenada coordenada) {
-        if (fase != FaseJuego.COLOCACION || colaColocacion.isEmpty()) {
+    private void onPositionBoardClick(Coordinate coordinate) {
+        if (phase != GamePhase.PLACEMENT || placementQueue.isEmpty()) {
             return;
         }
-        TipoBarco tipo = colaColocacion.get(0);
-        Ship barco = ShipFactory.crear(tipo);
+        ShipType type = placementQueue.get(0);
+        Ship ship = ShipFactory.create(type);
         try {
-            tableroPosicionHumano.colocarBarco(barco, coordenada, orientacionActual);
-            colaColocacion.remove(0);
-            if (colaColocacion.isEmpty()) {
-                comenzarFaseDeJuego();
+            humanPositionBoard.placeShip(ship, coordinate, currentOrientation);
+            placementQueue.remove(0);
+            positionView.clearPreview();
+            if (placementQueue.isEmpty()) {
+                startGamePhase();
             } else {
-                actualizarStatusColocacion();
+                updatePlacementStatus();
             }
-            autoguardar();
-        } catch (ColocacionInvalidaException e) {
+            autoSave();
+        } catch (InvalidPlacementException e) {
             statusLabel.setText("Colocacion invalida: " + e.getMessage());
         }
     }
 
-    private void actualizarStatusColocacion() {
-        if (colaColocacion.isEmpty()) {
+    /**
+     * Previsualiza, mientras el mouse pasa sobre el tablero de posicion
+     * durante la fase de colocacion, que casillas ocuparia el barco actual
+     * de la cola si se colocara ahi (en verde si es una posicion valida, en
+     * rojo si queda fuera del tablero o se superpone con otro barco). Es
+     * solo una ayuda visual: no coloca nada hasta que el jugador hace clic.
+     */
+    private void onPositionBoardHover(Coordinate coordinate) {
+        if (phase != GamePhase.PLACEMENT || placementQueue.isEmpty()) {
             return;
         }
-        TipoBarco siguiente = colaColocacion.get(0);
-        statusLabel.setText("Coloca tu " + siguiente + " (" + siguiente.getTamanio()
-                + " casillas) - Orientacion actual: " + orientacionActual);
+        ShipType type = placementQueue.get(0);
+        List<Coordinate> positions = new ArrayList<>(type.getSize());
+        boolean valid = true;
+        for (int i = 0; i < type.getSize(); i++) {
+            Coordinate position = coordinate.shift(currentOrientation, i);
+            positions.add(position);
+            if (!position.isWithinBoard(Board.SIZE) || humanPositionBoard.getCell(position).hasShip()) {
+                valid = false;
+            }
+        }
+        positionView.showPlacementPreview(positions, type, currentOrientation, valid);
     }
 
-    private void comenzarFaseDeJuego() {
-        fase = FaseJuego.JUEGO;
-        humano = new HumanPlayer(SesionJuego.getNicknameHumano(), tableroPosicionHumano);
+    private void updatePlacementStatus() {
+        if (placementQueue.isEmpty()) {
+            return;
+        }
+        ShipType next = placementQueue.get(0);
+        statusLabel.setText("Coloca tu " + next + " (" + next.getSize()
+                + " casillas) - Orientacion actual: " + currentOrientation);
+    }
 
-        RandomFleetPlacer.colocarFlotaAleatoria(tableroPrincipalMaquina);
-        maquina = new MachinePlayer("Maquina", tableroPrincipalMaquina, new RandomShootingStrategy());
-        vistaPrincipal.redibujarTodo();
+    private void startGamePhase() {
+        positionView.clearPreview();
+        phase = GamePhase.PLAYING;
+        human = new HumanPlayer(GameSession.getHumanNickname(), humanPositionBoard);
 
-        turno = TurnoJuego.HUMANO;
+        RandomFleetPlacer.placeRandomFleet(machineMainBoard);
+        machine = new MachinePlayer("Maquina", machineMainBoard, new HuntTargetShootingStrategy());
+        mainView.redrawAll();
+
+        turn = GameTurn.HUMAN;
         statusLabel.setText("Flota lista. Es tu turno: dispara en el tablero enemigo.");
-        autoguardar();
+        autoSave();
     }
 
-    private void onClickTableroPrincipal(Coordenada coordenada) {
-        if (fase != FaseJuego.JUEGO || turno != TurnoJuego.HUMANO) {
+    private void onMainBoardClick(Coordinate coordinate) {
+        if (phase != GamePhase.PLAYING || turn != GameTurn.HUMAN) {
             return;
         }
         try {
-            ResultadoDisparo resultado = tableroPrincipalMaquina.disparar(coordenada);
-            humano.registrarDisparo(new Shot(coordenada, resultado));
-            statusLabel.setText("Disparaste en " + coordenada + ": " + resultado);
+            ShotResult result = machineMainBoard.shoot(coordinate);
+            human.recordShot(new Shot(coordinate, result));
+            statusLabel.setText("Disparaste en " + coordinate + ": " + result);
 
-            if (tableroPrincipalMaquina.todaLaFlotaHundida()) {
-                finalizarJuego("Hundiste toda la flota enemiga. Ganaste.");
+            if (machineMainBoard.isFleetFullySunk()) {
+                endGame("Hundiste toda la flota enemiga. Ganaste.");
                 return;
             }
 
-            if (resultado == ResultadoDisparo.AGUA) {
-                turno = TurnoJuego.MAQUINA;
-                pausarYLuego(this::turnoMaquina);
+            if (result == ShotResult.WATER) {
+                turn = GameTurn.MACHINE;
+                pauseThen(this::machineTurn);
             }
             // si fue TOCADO o HUNDIDO (y no gano todavia), el humano dispara de nuevo
-            autoguardar();
-        } catch (DisparoInvalidoException e) {
+            autoSave();
+        } catch (InvalidShotException e) {
             statusLabel.setText(e.getMessage());
         }
     }
 
-    private void turnoMaquina() {
-        Coordenada objetivo = maquina.elegirObjetivo(tableroPosicionHumano);
-        ResultadoDisparo resultado = tableroPosicionHumano.disparar(objetivo);
-        maquina.registrarDisparo(new Shot(objetivo, resultado));
-        statusLabel.setText("La maquina disparo en " + objetivo + ": " + resultado);
+    private void machineTurn() {
+        Coordinate target = machine.chooseTarget(humanPositionBoard);
+        ShotResult result = humanPositionBoard.shoot(target);
+        machine.recordShot(new Shot(target, result));
+        statusLabel.setText("La maquina disparo en " + target + ": " + result);
 
-        if (tableroPosicionHumano.todaLaFlotaHundida()) {
-            finalizarJuego("La maquina hundio toda tu flota. Perdiste.");
+        if (humanPositionBoard.isFleetFullySunk()) {
+            endGame("La maquina hundio toda tu flota. Perdiste.");
             return;
         }
 
-        if (resultado == ResultadoDisparo.AGUA) {
-            turno = TurnoJuego.HUMANO;
-            autoguardar();
+        if (result == ShotResult.WATER) {
+            turn = GameTurn.HUMAN;
+            autoSave();
         } else {
-            autoguardar();
-            pausarYLuego(this::turnoMaquina);
+            autoSave();
+            pauseThen(this::machineTurn);
         }
     }
 
     /** Pequena pausa entre disparos de la maquina para que se alcancen a ver en la UI. */
-    private void pausarYLuego(Runnable accion) {
-        PauseTransition pausa = new PauseTransition(Duration.seconds(0.6));
-        pausa.setOnFinished(evento -> accion.run());
-        pausa.play();
+    private void pauseThen(Runnable action) {
+        PauseTransition pause = new PauseTransition(Duration.seconds(0.6));
+        pause.setOnFinished(event -> action.run());
+        pause.play();
     }
 
-    private void finalizarJuego(String mensaje) {
-        fase = FaseJuego.FIN;
-        statusLabel.setText(mensaje);
-        autoguardar();
+    private void endGame(String message) {
+        phase = GamePhase.FINISHED;
+        statusLabel.setText(message);
+        autoSave();
     }
 }

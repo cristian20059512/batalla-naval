@@ -15,33 +15,33 @@ public abstract class Player implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final String nickname;
-    private final Board tableroPropio;
-    private final List<Shot> historialDisparos = new ArrayList<>();
+    private final Board ownBoard;
+    private final List<Shot> shotHistory = new ArrayList<>();
 
-    protected Player(String nickname, Board tableroPropio) {
+    protected Player(String nickname, Board ownBoard) {
         this.nickname = nickname;
-        this.tableroPropio = tableroPropio;
+        this.ownBoard = ownBoard;
     }
 
     public String getNickname() {
         return nickname;
     }
 
-    public Board getTableroPropio() {
-        return tableroPropio;
+    public Board getOwnBoard() {
+        return ownBoard;
     }
 
-    public List<Shot> getHistorialDisparos() {
-        return historialDisparos;
+    public List<Shot> getShotHistory() {
+        return shotHistory;
     }
 
-    public void registrarDisparo(Shot disparo) {
-        historialDisparos.add(disparo);
+    public void recordShot(Shot shot) {
+        shotHistory.add(shot);
     }
 
-    public int contarBarcosHundidosPropios() {
-        return tableroPropio.getFlota() == null
+    public int countOwnSunkShips() {
+        return ownBoard.getFleet() == null
                 ? 0
-                : (int) tableroPropio.getFlota().contarBarcosHundidos();
+                : (int) ownBoard.getFleet().countSunkShips();
     }
 }

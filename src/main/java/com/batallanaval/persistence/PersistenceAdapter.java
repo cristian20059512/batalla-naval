@@ -1,6 +1,6 @@
 package com.batallanaval.persistence;
 
-import com.batallanaval.exception.PersistenciaException;
+import com.batallanaval.exception.PersistenceException;
 
 /**
  * Puerto comun (patron Adapter) que el resto de la aplicacion usa para
@@ -12,11 +12,11 @@ import com.batallanaval.exception.PersistenciaException;
  */
 public interface PersistenceAdapter<T> {
 
-    void guardar(T datos) throws PersistenciaException;
+    void save(T data) throws PersistenceException;
 
-    T cargar() throws PersistenciaException;
+    T load() throws PersistenceException;
 
-    boolean existeGuardado();
+    boolean hasSavedData();
 
-    void eliminarGuardado() throws PersistenciaException;
+    void deleteSavedData() throws PersistenceException;
 }
