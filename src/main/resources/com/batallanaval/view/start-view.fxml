@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="rootPane" style="-fx-background-color: #042C53;" stylesheets="@start-view.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.batallanaval.controller.StartController">
+    <ImageView fitHeight="${rootPane.height}" fitWidth="${rootPane.width}" preserveRatio="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <image>
+            <Image url="@images/fondo-inicio.png" />
+        </image>
+    </ImageView>
+
+    <Label alignment="CENTER" layoutX="249.0" layoutY="41.0" style="-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.85), 4, 0.4, 1, 1);" text="Batalla naval" textAlignment="CENTER" textFill="#F5DFA3" AnchorPane.bottomAnchor="477.4" AnchorPane.leftAnchor="249.0" AnchorPane.rightAnchor="248.5999999999999" AnchorPane.topAnchor="41.0">
+        <font>
+            <Font name="Times New Roman Bold Italic" size="34.0" />
+        </font>
+    </Label>
+
+    <VBox alignment="CENTER" spacing="4.0" AnchorPane.leftAnchor="430.0" AnchorPane.rightAnchor="430.0" AnchorPane.topAnchor="300.0">
+        <Label style="-fx-font-size: 11px;" styleClass="subtle-text" text="NOMBRE" />
+        <TextField fx:id="nicknameField" prefHeight="30.0" promptText="Ejemplo: Cristian" style="-fx-background-color: rgba(12,68,124,0.85); -fx-text-fill: #E6F1FB; -fx-prompt-text-fill: #85B7EB; -fx-background-radius: 6;" />
+    </VBox>
+
+    <VBox alignment="CENTER" prefHeight="268.0" prefWidth="815.0" spacing="10.0" AnchorPane.leftAnchor="440.0" AnchorPane.rightAnchor="440.0" AnchorPane.topAnchor="384.0">
+        <Button fx:id="jugarButton" alignment="CENTER" maxWidth="Infinity" onAction="#onJugar" prefHeight="80.0" prefWidth="815.0" styleClass="wood-button" text="Levantar anclas" />
+        <Button fx:id="continuarButton" alignment="CENTER" maxWidth="Infinity" onAction="#onContinuar" prefHeight="68.0" styleClass="wood-button" text="Bitacora de viaje" />
+        <Button fx:id="opcionesButton" alignment="CENTER" maxWidth="Infinity" onAction="#onOpciones" prefHeight="68.0" styleClass="wood-button" text="Opciones" />
+        <Button fx:id="salirButton" alignment="CENTER" maxWidth="Infinity" onAction="#onSalir" prefHeight="68.0" styleClass="wood-button" text="Abandonar barco" />
+    </VBox>
+
+    <Label fx:id="mensajeLabel" alignment="CENTER" style="-fx-font-size: 11px;" textAlignment="CENTER" textFill="#F0997B" wrapText="true" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="330.0" AnchorPane.rightAnchor="330.0" />
+</AnchorPane>

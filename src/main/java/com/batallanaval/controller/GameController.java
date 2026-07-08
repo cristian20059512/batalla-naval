@@ -18,6 +18,7 @@ import com.batallanaval.util.Coordenada;
 import com.batallanaval.util.FaseJuego;
 import com.batallanaval.util.Orientacion;
 import com.batallanaval.util.ResultadoDisparo;
+import com.batallanaval.util.SesionJuego;
 import com.batallanaval.util.TipoBarco;
 import com.batallanaval.util.TurnoJuego;
 import com.batallanaval.view.BoardView;
@@ -227,7 +228,7 @@ public class GameController {
 
     private void comenzarFaseDeJuego() {
         fase = FaseJuego.JUEGO;
-        humano = new HumanPlayer("Jugador", tableroPosicionHumano);
+        humano = new HumanPlayer(SesionJuego.getNicknameHumano(), tableroPosicionHumano);
 
         RandomFleetPlacer.colocarFlotaAleatoria(tableroPrincipalMaquina);
         maquina = new MachinePlayer("Maquina", tableroPrincipalMaquina, new RandomShootingStrategy());
