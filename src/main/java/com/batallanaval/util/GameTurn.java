@@ -7,7 +7,7 @@ import java.io.Serializable;
  * un enum privado) para poder guardarla como parte del estado serializable
  * de la partida.
  */
-public enum TurnoJuego implements Serializable {
-    HUMANO,
-    MAQUINA
+public enum GameTurn implements Serializable {
+    HUMAN,
+    MACHINE
 }

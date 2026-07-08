@@ -1,6 +1,6 @@
 package com.batallanaval.persistence;
 
-import com.batallanaval.exception.PersistenciaException;
+import com.batallanaval.exception.PersistenceException;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,32 +14,32 @@ import java.nio.file.Paths;
  */
 public class GamePersistenceManager {
 
-    private static final Path CARPETA_GUARDADO = Paths.get("saves");
+    private static final Path SAVE_FOLDER = Paths.get("saves");
 
-    private final PersistenceAdapter<EstadoPartida> adaptadorTablero =
-            new SerializacionEstadoAdapter(CARPETA_GUARDADO.resolve("partida.dat"));
-    private final PersistenceAdapter<ResumenPartida> adaptadorResumen =
-            new ArchivoPlanoResumenAdapter(CARPETA_GUARDADO.resolve("resumen.txt"));
+    private final PersistenceAdapter<GameState> stateAdapter =
+            new SerializedStateAdapter(SAVE_FOLDER.resolve("partida.dat"));
+    private final PersistenceAdapter<GameSummary> summaryAdapter =
+            new PlainTextSummaryAdapter(SAVE_FOLDER.resolve("resumen.txt"));
 
-    public void guardarPartida(EstadoPartida estado, ResumenPartida resumen) throws PersistenciaException {
-        adaptadorTablero.guardar(estado);
-        adaptadorResumen.guardar(resumen);
+    public void saveGame(GameState state, GameSummary summary) throws PersistenceException {
+        stateAdapter.save(state);
+        summaryAdapter.save(summary);
     }
 
-    public boolean existePartidaGuardada() {
-        return adaptadorTablero.existeGuardado() && adaptadorResumen.existeGuardado();
+    public boolean hasSavedGame() {
+        return stateAdapter.hasSavedData() && summaryAdapter.hasSavedData();
     }
 
-    public EstadoPartida cargarEstado() throws PersistenciaException {
-        return adaptadorTablero.cargar();
+    public GameState loadState() throws PersistenceException {
+        return stateAdapter.load();
     }
 
-    public ResumenPartida cargarResumen() throws PersistenciaException {
-        return adaptadorResumen.cargar();
+    public GameSummary loadSummary() throws PersistenceException {
+        return summaryAdapter.load();
     }
 
-    public void eliminarPartidaGuardada() throws PersistenciaException {
-        adaptadorTablero.eliminarGuardado();
-        adaptadorResumen.eliminarGuardado();
+    public void deleteSavedGame() throws PersistenceException {
+        stateAdapter.deleteSavedData();
+        summaryAdapter.deleteSavedData();
     }
 }

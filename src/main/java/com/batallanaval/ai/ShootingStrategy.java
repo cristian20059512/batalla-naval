@@ -1,7 +1,7 @@
 package com.batallanaval.ai;
 
 import com.batallanaval.model.Board;
-import com.batallanaval.util.Coordenada;
+import com.batallanaval.util.Coordinate;
 
 /**
  * Patron Strategy: define como la maquina elige su proxima coordenada de
@@ -15,5 +15,5 @@ public interface ShootingStrategy {
      * Elige la siguiente coordenada de disparo sobre el tablero del
      * oponente, garantizando que no sea una casilla ya disparada.
      */
-    Coordenada elegirDisparo(Board tableroEnemigo);
+    Coordinate chooseShot(Board enemyBoard);
 }

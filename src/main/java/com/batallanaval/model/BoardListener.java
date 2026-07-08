@@ -1,7 +1,7 @@
 package com.batallanaval.model;
 
-import com.batallanaval.util.Coordenada;
-import com.batallanaval.util.EstadoCelda;
+import com.batallanaval.util.Coordinate;
+import com.batallanaval.util.CellState;
 
 /**
  * Patron Observer: quien implemente esta interfaz (tipicamente un
@@ -12,5 +12,5 @@ import com.batallanaval.util.EstadoCelda;
  */
 public interface BoardListener {
 
-    void onCambioCelda(Coordenada coordenada, EstadoCelda nuevoEstado);
+    void onCellChanged(Coordinate coordinate, CellState newState);
 }

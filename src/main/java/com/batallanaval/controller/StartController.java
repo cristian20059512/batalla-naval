@@ -1,8 +1,8 @@
 package com.batallanaval.controller;
 
-import com.batallanaval.exception.PersistenciaException;
+import com.batallanaval.exception.PersistenceException;
 import com.batallanaval.persistence.GamePersistenceManager;
-import com.batallanaval.util.SesionJuego;
+import com.batallanaval.util.GameSession;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -32,46 +32,46 @@ public class StartController {
     private TextField nicknameField;
 
     @FXML
-    private Button continuarButton;
+    private Button continueButton;
 
     @FXML
-    private Label mensajeLabel;
+    private Label messageLabel;
 
-    private final GamePersistenceManager persistencia = new GamePersistenceManager();
+    private final GamePersistenceManager persistenceManager = new GamePersistenceManager();
 
     @FXML
     public void initialize() {
-        continuarButton.setDisable(!persistencia.existePartidaGuardada());
+        continueButton.setDisable(!persistenceManager.hasSavedGame());
     }
 
     @FXML
-    private void onJugar() {
-        SesionJuego.setNicknameHumano(nicknameField.getText());
+    private void onPlay() {
+        GameSession.setHumanNickname(nicknameField.getText());
         try {
-            persistencia.eliminarPartidaGuardada();
-        } catch (PersistenciaException e) {
+            persistenceManager.deleteSavedGame();
+        } catch (PersistenceException e) {
             LOG.log(Level.WARNING, "No se pudo borrar la partida guardada anterior.", e);
         }
-        irAlJuego();
+        goToGame();
     }
 
     @FXML
-    private void onContinuar() {
-        irAlJuego();
+    private void onContinue() {
+        goToGame();
     }
 
     @FXML
-    private void onOpciones() {
-        mensajeLabel.setTextFill(Color.web("#F5E6C8"));
-        mensajeLabel.setText("Las opciones todavia no estan disponibles.");
+    private void onOptions() {
+        messageLabel.setTextFill(Color.web("#F5E6C8"));
+        messageLabel.setText("Las opciones todavia no estan disponibles.");
     }
 
     @FXML
-    private void onSalir() {
+    private void onExit() {
         Platform.exit();
     }
 
-    private void irAlJuego() {
+    private void goToGame() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/batallanaval/view/main-view.fxml"));
             Parent root = loader.load();
@@ -80,7 +80,7 @@ public class StartController {
             stage.setResizable(true);
         } catch (IOException e) {
             LOG.log(Level.SEVERE, "No se pudo cargar el tablero de juego.", e);
-            mensajeLabel.setText("No se pudo iniciar la partida: " + e.getMessage());
+            messageLabel.setText("No se pudo iniciar la partida: " + e.getMessage());
         }
     }
 }

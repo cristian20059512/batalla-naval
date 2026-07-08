@@ -6,13 +6,13 @@ package com.batallanaval.exception;
  * archivos planos). Checked porque el fallo de IO siempre debe ser
  * capturado y comunicado al usuario, nunca ignorado.
  */
-public class PersistenciaException extends Exception {
+public class PersistenceException extends Exception {
 
-    public PersistenciaException(String mensaje, Throwable causa) {
-        super(mensaje, causa);
+    public PersistenceException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    public PersistenciaException(String mensaje) {
-        super(mensaje);
+    public PersistenceException(String message) {
+        super(message);
     }
 }

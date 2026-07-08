@@ -7,8 +7,8 @@ import java.io.Serializable;
  * era un enum privado) para poder guardarla como parte del estado
  * serializable de la partida.
  */
-public enum FaseJuego implements Serializable {
-    COLOCACION,
-    JUEGO,
-    FIN
+public enum GamePhase implements Serializable {
+    PLACEMENT,
+    PLAYING,
+    FINISHED
 }

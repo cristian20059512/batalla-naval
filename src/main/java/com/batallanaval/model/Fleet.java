@@ -12,25 +12,25 @@ public class Fleet implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final List<Ship> barcos;
+    private final List<Ship> ships;
 
-    public Fleet(List<Ship> barcos) {
-        this.barcos = barcos;
+    public Fleet(List<Ship> ships) {
+        this.ships = ships;
     }
 
-    public List<Ship> getBarcos() {
-        return barcos;
+    public List<Ship> getShips() {
+        return ships;
     }
 
-    public boolean estaCompletamenteHundida() {
-        return barcos.stream().allMatch(Ship::estaHundido);
+    public boolean isCompletelySunk() {
+        return ships.stream().allMatch(Ship::isSunk);
     }
 
-    public long contarBarcosHundidos() {
-        return barcos.stream().filter(Ship::estaHundido).count();
+    public long countSunkShips() {
+        return ships.stream().filter(Ship::isSunk).count();
     }
 
-    public int getTotalBarcos() {
-        return barcos.size();
+    public int getTotalShips() {
+        return ships.size();
     }
 }
