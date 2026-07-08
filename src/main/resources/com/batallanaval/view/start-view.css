@@ -1,0 +1,24 @@
+.subtle-text {
+    -fx-text-fill: #F5E6C8;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.85), 4, 0.4, 1, 1);
+}
+
+.wood-button {
+    -fx-background-color: transparent;
+    -fx-background-image: url("images/plank-button.png");
+    -fx-background-size: 100% 100%;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-text-fill: #F5E6C8;
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 2, 0.5, 1, 1);
+}
+
+.wood-button:hover {
+    -fx-text-fill: #FFF3D6;
+}
+
+.wood-button:pressed {
+    -fx-text-fill: #D9BE84;
+}

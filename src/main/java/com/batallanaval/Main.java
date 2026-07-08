@@ -17,12 +17,13 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader loader = new FXMLLoader(
-                Main.class.getResource("/com/batallanaval/view/main-view.fxml"));
+                Main.class.getResource("/com/batallanaval/view/start-view.fxml"));
         Parent root = loader.load();
 
-        Scene scene = new Scene(root, 900, 650);
+        Scene scene = new Scene(root, 1280, 690);
         stage.setTitle("Batalla Naval");
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.show();
     }
 
