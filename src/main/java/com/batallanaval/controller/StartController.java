@@ -72,8 +72,9 @@ public class StartController {
                 "Coloca tu flota (1 portaaviones, 2 submarinos, 3 destructores, 4 fragatas) y "
                         + "dispara sobre el tablero enemigo: agua (X, pasa el turno), tocado (sigues "
                         + "disparando) u hundido (el barco completo queda marcado). "
-                        + "Atajos: R gira el barco, ESPACIO coloca la flota al azar, ESC muestra el "
-                        + "tablero enemigo (solo antes o despues de jugar, no hace trampa a mitad de partida).");
+                        + "Atajos: R gira el barco, ESPACIO coloca la flota al azar, V muestra el "
+                        + "tablero enemigo (solo antes o despues de jugar, no hace trampa a mitad de "
+                        + "partida) y ESC vuelve al menu principal.");
     }
 
     @FXML

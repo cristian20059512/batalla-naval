@@ -78,7 +78,7 @@ mvn test
    el propio texto de los botones ("Girar barco (R)", "... (ESPACIO)") y en
    tooltips, no hay que memorizarlos de otra parte.
 7. **Flexibilidad y eficiencia de uso**: cada acción principal tiene mouse
-   (botón) y teclado (R, ESPACIO, ESC) para jugadores nuevos y expertos.
+   (botón) y teclado (R, ESPACIO, V, ESC) para jugadores nuevos y expertos.
 8. **Estética y diseño minimalista**: paneles agrupados por tablero
    (`board-frame`), sin controles sueltos ni ruido visual adicional.
 9. **Ayudar a reconocer, diagnosticar y recuperarse de errores**: los

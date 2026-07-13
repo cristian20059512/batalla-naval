@@ -65,6 +65,16 @@
     -fx-cursor: default;
 }
 
+.key-hint {
+    -fx-text-fill: #2A1806;
+    -fx-background-color: #F5DFA3;
+    -fx-background-radius: 4;
+    -fx-padding: 1 6 1 6;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 2, 0.4, 1, 1);
+}
+
 .board-frame {
     -fx-background-color: rgba(12,25,40,0.55);
     -fx-background-radius: 8;

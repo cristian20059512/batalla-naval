@@ -21,24 +21,6 @@
         </image>
     </ImageView>
 
-    <Button fx:id="compassButton" maxHeight="64.0" maxWidth="64.0" minHeight="64.0" minWidth="64.0" onAction="#onToggleVerification" prefHeight="64.0" prefWidth="64.0" styleClass="compass-button" text="&#x1F9ED;" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
-        <cursor>
-            <Cursor fx:constant="HAND" />
-        </cursor>
-        <tooltip>
-            <Tooltip text="Ver tablero enemigo (solo antes o despues de jugar) - atajo: ESC" />
-        </tooltip>
-    </Button>
-
-    <Button maxHeight="64.0" maxWidth="64.0" minHeight="64.0" minWidth="64.0" onAction="#onBackToMenu" prefHeight="64.0" prefWidth="64.0" styleClass="compass-button" text="&#x2B05;" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="20.0">
-        <cursor>
-            <Cursor fx:constant="HAND" />
-        </cursor>
-        <tooltip>
-            <Tooltip text="Volver al menu principal (la partida se guarda sola)" />
-        </tooltip>
-    </Button>
-
     <BorderPane style="-fx-background-color: transparent;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <top>
             <VBox alignment="CENTER" spacing="8.0">
@@ -88,4 +70,32 @@
             </HBox>
         </center>
     </BorderPane>
+
+    <!-- Los dos botones de esquina van despues del BorderPane a proposito:
+         un Region con fondo transparente igual intercepta los clics de lo
+         que tiene debajo en JavaFX, asi que deben quedar por encima en el
+         orden de hijos para poder recibir el clic. -->
+    <VBox alignment="CENTER" spacing="2.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
+        <Button fx:id="compassButton" maxHeight="64.0" maxWidth="64.0" minHeight="64.0" minWidth="64.0" onAction="#onToggleVerification" prefHeight="64.0" prefWidth="64.0" styleClass="compass-button" text="&#x1F9ED;">
+            <cursor>
+                <Cursor fx:constant="HAND" />
+            </cursor>
+            <tooltip>
+                <Tooltip text="Ver tablero enemigo (solo antes o despues de jugar) - atajo: V" />
+            </tooltip>
+        </Button>
+        <Label styleClass="key-hint" text="V" />
+    </VBox>
+
+    <VBox alignment="CENTER" spacing="2.0" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="20.0">
+        <Button maxHeight="64.0" maxWidth="64.0" minHeight="64.0" minWidth="64.0" onAction="#onBackToMenu" prefHeight="64.0" prefWidth="64.0" styleClass="compass-button" text="&#x2B05;">
+            <cursor>
+                <Cursor fx:constant="HAND" />
+            </cursor>
+            <tooltip>
+                <Tooltip text="Volver al menu principal (la partida se guarda sola) - atajo: ESC" />
+            </tooltip>
+        </Button>
+        <Label styleClass="key-hint" text="ESC" />
+    </VBox>
 </AnchorPane>

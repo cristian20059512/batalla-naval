@@ -24,6 +24,22 @@ public final class RandomFleetPlacer {
 
     public static Fleet placeRandomFleet(Board board) {
         List<Ship> ships = ShipFactory.createFullFleet();
+        placeShipsRandomly(board, ships);
+        Fleet fleet = new Fleet(ships);
+        board.setFleet(fleet);
+        return fleet;
+    }
+
+    /**
+     * Coloca al azar, sin superposicion ni salirse del tablero, cada barco
+     * de la lista dada. A diferencia de {@link #placeRandomFleet(Board)},
+     * no crea una flota desde cero ni reemplaza el {@code Fleet} del
+     * tablero: sirve para completar solo los barcos que todavia falten
+     * cuando parte de la flota ya se coloco a mano (si no, "Colocar flota
+     * aleatoria" terminaria agregando 10 barcos nuevos encima de los que ya
+     * estaban puestos).
+     */
+    public static void placeShipsRandomly(Board board, List<Ship> ships) {
         Random random = new Random();
 
         for (Ship ship : ships) {
@@ -47,9 +63,5 @@ public final class RandomFleetPlacer {
                                 + MAX_ATTEMPTS_PER_SHIP + " intentos.");
             }
         }
-
-        Fleet fleet = new Fleet(ships);
-        board.setFleet(fleet);
-        return fleet;
     }
 }
