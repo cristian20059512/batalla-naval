@@ -9,8 +9,10 @@ import com.batallanaval.util.CellState;
 import com.batallanaval.util.Orientation;
 import com.batallanaval.util.ShipType;
 
+import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -108,22 +110,44 @@ public class BoardView implements BoardListener {
         previewOverlays[coordinate.getRow()][coordinate.getColumn()] = overlay;
         stack.getChildren().add(overlay);
 
-        stack.setOnMouseClicked(event -> {
-            if (onCellClick != null) {
-                onCellClick.accept(coordinate);
-            }
-        });
-        stack.setOnMouseEntered(event -> {
-            if (onCellHoverEnter != null) {
-                onCellHoverEnter.accept(coordinate);
-            }
-        });
-        stack.setOnMouseExited(event -> {
-            if (onCellHoverExit != null) {
-                onCellHoverExit.accept(coordinate);
-            }
-        });
+        CellInteractionHandler handler = new CellInteractionHandler(coordinate);
+        stack.setOnMouseClicked(handler);
+        stack.setOnMouseEntered(handler);
+        stack.setOnMouseExited(handler);
         return stack;
+    }
+
+    /**
+     * Clase interna (no estatica: necesita los campos onCellClick/
+     * onCellHoverEnter/onCellHoverExit de su BoardView) que agrupa el manejo
+     * de los tres eventos de mouse de una celda (click, entra, sale) en un
+     * unico {@link EventHandler}, en vez de repetir tres lambdas casi
+     * identicas por cada una de las 100 celdas del tablero.
+     */
+    private class CellInteractionHandler implements EventHandler<MouseEvent> {
+
+        private final Coordinate coordinate;
+
+        private CellInteractionHandler(Coordinate coordinate) {
+            this.coordinate = coordinate;
+        }
+
+        @Override
+        public void handle(MouseEvent event) {
+            if (event.getEventType() == MouseEvent.MOUSE_CLICKED) {
+                if (onCellClick != null) {
+                    onCellClick.accept(coordinate);
+                }
+            } else if (event.getEventType() == MouseEvent.MOUSE_ENTERED) {
+                if (onCellHoverEnter != null) {
+                    onCellHoverEnter.accept(coordinate);
+                }
+            } else if (event.getEventType() == MouseEvent.MOUSE_EXITED) {
+                if (onCellHoverExit != null) {
+                    onCellHoverExit.accept(coordinate);
+                }
+            }
+        }
     }
 
     public void setOnCellClick(Consumer<Coordinate> handler) {

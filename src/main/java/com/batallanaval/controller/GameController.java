@@ -5,6 +5,7 @@ import com.batallanaval.exception.InvalidPlacementException;
 import com.batallanaval.exception.InvalidShotException;
 import com.batallanaval.exception.PersistenceException;
 import com.batallanaval.model.Board;
+import com.batallanaval.model.Fleet;
 import com.batallanaval.model.HumanPlayer;
 import com.batallanaval.model.MachinePlayer;
 import com.batallanaval.model.RandomFleetPlacer;
@@ -15,6 +16,7 @@ import com.batallanaval.persistence.GameState;
 import com.batallanaval.persistence.GamePersistenceManager;
 import com.batallanaval.persistence.GameSummary;
 import com.batallanaval.util.Coordinate;
+import com.batallanaval.util.GameClock;
 import com.batallanaval.util.GamePhase;
 import com.batallanaval.util.Orientation;
 import com.batallanaval.util.ShotResult;
@@ -23,13 +25,17 @@ import com.batallanaval.util.ShipType;
 import com.batallanaval.util.GameTurn;
 import com.batallanaval.view.BoardView;
 
-import javafx.animation.PauseTransition;
+import javafx.application.Platform;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
-import javafx.util.Duration;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -51,6 +57,7 @@ public class GameController {
     private final BoardView positionView;
     private final BoardView mainView;
     private final Label statusLabel;
+    private final GameClock gameClock;
 
     private final GamePersistenceManager persistenceManager = new GamePersistenceManager();
 
@@ -60,12 +67,18 @@ public class GameController {
     private GamePhase phase = GamePhase.PLACEMENT;
     private GameTurn turn = GameTurn.HUMAN;
 
-    private final List<ShipType> placementQueue = new ArrayList<>();
+    // Deque (no List): la cola de colocacion se consume estrictamente FIFO
+    // (el barco de encabezado sale con pollFirst() al colocarlo), asi que un
+    // Deque expresa esa intencion mejor que una lista de proposito general.
+    private final Deque<ShipType> placementQueue = new ArrayDeque<>();
     private Orientation currentOrientation = Orientation.RIGHT;
     private boolean verificationMode = false;
 
-    public GameController(Pane positionContainer, Pane mainContainer, Label statusLabel) {
+    private Consumer<Boolean> onVerificationAvailabilityChanged = available -> { };
+
+    public GameController(Pane positionContainer, Pane mainContainer, Label statusLabel, Label timerLabel) {
         this.statusLabel = statusLabel;
+        this.gameClock = new GameClock(timerLabel);
 
         positionView = new BoardView(humanPositionBoard, true);
         mainView = new BoardView(machineMainBoard, false);
@@ -126,6 +139,7 @@ public class GameController {
                 statusLabel.setText("Partida cargada: la partida ya habia finalizado.");
             } else {
                 statusLabel.setText("Partida cargada. Turno: " + turn);
+                gameClock.start();
                 if (turn == GameTurn.MACHINE) {
                     pauseThen(this::machineTurn);
                 }
@@ -147,7 +161,7 @@ public class GameController {
      */
     private void autoSave() {
         GameState state = new GameState(humanPositionBoard, machineMainBoard, phase, turn,
-                placementQueue, currentOrientation, verificationMode);
+                new ArrayList<>(placementQueue), currentOrientation, verificationMode);
         GameSummary summary = new GameSummary(
                 human != null ? human.getNickname() : "Jugador",
                 machine != null ? machine.getNickname() : "Maquina",
@@ -188,10 +202,53 @@ public class GameController {
         }
     }
 
-    /** Invocado por el boton "Ver tablero enemigo": modo de verificacion (HU-3). */
-    public void toggleVerification() {
+    /**
+     * Invocado por el boton brujula (modo de verificacion, HU-3). Devuelve
+     * el nuevo estado para que la vista pueda reflejarlo (p. ej. resaltando
+     * el boton mientras el modo esta activo).
+     *
+     * HU-3 pide que esta opcion sea "unicamente para fines de verificacion
+     * y no [este disponible] durante el juego normal": mientras la partida
+     * esta en curso (fase JUEGO) el boton queda deshabilitado en la vista
+     * (ver {@link #setOnVerificationAvailabilityChanged}), pero por si se
+     * llegara a invocar de otra forma, aqui tambien se bloquea el cambio.
+     */
+    public boolean toggleVerification() {
+        if (!canVerify()) {
+            return verificationMode;
+        }
         verificationMode = !verificationMode;
         mainView.setVerificationMode(verificationMode);
+        autoSave();
+        return verificationMode;
+    }
+
+    /** Estado actual del modo de verificacion, para que la vista lo refleje al cargar una partida guardada. */
+    public boolean isVerificationMode() {
+        return verificationMode;
+    }
+
+    /**
+     * La verificacion del tablero enemigo solo tiene sentido fuera de una
+     * partida activa: antes de que empiece (fase COLOCACION, aunque ahi el
+     * tablero enemigo todavia esta vacio) o despues de que termine (fase
+     * FIN, para que el profesor revise que todo quedo bien). Durante la
+     * fase JUEGO se bloquea para que no sea una forma de hacer trampa.
+     */
+    private boolean canVerify() {
+        return phase != GamePhase.PLAYING;
+    }
+
+    /**
+     * Permite que la vista (MainController) se entere de cuando el boton de
+     * verificacion debe habilitarse o deshabilitarse, sin que el controlador
+     * de la vista tenga que conocer la fase interna de la partida. Se avisa
+     * de inmediato con el estado actual al registrarse (util al cargar una
+     * partida guardada que ya estaba en fase JUEGO).
+     */
+    public void setOnVerificationAvailabilityChanged(Consumer<Boolean> callback) {
+        this.onVerificationAvailabilityChanged = callback != null ? callback : available -> { };
+        this.onVerificationAvailabilityChanged.accept(canVerify());
     }
 
     /** Invocado por el boton "Colocar flota aleatoria": atajo para no colocar barco por barco. */
@@ -209,11 +266,11 @@ public class GameController {
         if (phase != GamePhase.PLACEMENT || placementQueue.isEmpty()) {
             return;
         }
-        ShipType type = placementQueue.get(0);
+        ShipType type = placementQueue.peekFirst();
         Ship ship = ShipFactory.create(type);
         try {
             humanPositionBoard.placeShip(ship, coordinate, currentOrientation);
-            placementQueue.remove(0);
+            placementQueue.pollFirst();
             positionView.clearPreview();
             if (placementQueue.isEmpty()) {
                 startGamePhase();
@@ -237,7 +294,7 @@ public class GameController {
         if (phase != GamePhase.PLACEMENT || placementQueue.isEmpty()) {
             return;
         }
-        ShipType type = placementQueue.get(0);
+        ShipType type = placementQueue.peekFirst();
         List<Coordinate> positions = new ArrayList<>(type.getSize());
         boolean valid = true;
         for (int i = 0; i < type.getSize(); i++) {
@@ -254,7 +311,7 @@ public class GameController {
         if (placementQueue.isEmpty()) {
             return;
         }
-        ShipType next = placementQueue.get(0);
+        ShipType next = placementQueue.peekFirst();
         statusLabel.setText("Coloca tu " + next + " (" + next.getSize()
                 + " casillas) - Orientacion actual: " + currentOrientation);
     }
@@ -262,6 +319,17 @@ public class GameController {
     private void startGamePhase() {
         positionView.clearPreview();
         phase = GamePhase.PLAYING;
+
+        // Cuando el jugador coloca los barcos uno por uno (en vez de usar
+        // "Colocar flota aleatoria"), Board.placeShip nunca arma un Fleet
+        // (solo RandomFleetPlacer lo hace). Sin Fleet, isFleetFullySunk()
+        // siempre da falso y el jugador nunca podria perder. Si todavia no
+        // hay Fleet aqui, se arma leyendo los barcos que ya quedaron en las
+        // celdas del tablero.
+        if (humanPositionBoard.getFleet() == null) {
+            humanPositionBoard.setFleet(collectPlacedFleet(humanPositionBoard));
+        }
+
         human = new HumanPlayer(GameSession.getHumanNickname(), humanPositionBoard);
 
         RandomFleetPlacer.placeRandomFleet(machineMainBoard);
@@ -270,7 +338,27 @@ public class GameController {
 
         turn = GameTurn.HUMAN;
         statusLabel.setText("Flota lista. Es tu turno: dispara en el tablero enemigo.");
+        onVerificationAvailabilityChanged.accept(canVerify());
+        gameClock.start();
         autoSave();
+    }
+
+    /**
+     * Recorre las 100 casillas del tablero y agrupa (sin duplicados) los
+     * barcos que ya estan colocados en el, para armar el Fleet que le hace
+     * falta al tablero cuando la colocacion fue manual, casilla por casilla.
+     */
+    private Fleet collectPlacedFleet(Board board) {
+        Set<Ship> ships = new LinkedHashSet<>();
+        for (int row = 0; row < Board.SIZE; row++) {
+            for (int column = 0; column < Board.SIZE; column++) {
+                Ship ship = board.getCell(new Coordinate(row, column)).getShip();
+                if (ship != null) {
+                    ships.add(ship);
+                }
+            }
+        }
+        return new Fleet(new ArrayList<>(ships));
     }
 
     private void onMainBoardClick(Coordinate coordinate) {
@@ -318,16 +406,33 @@ public class GameController {
         }
     }
 
-    /** Pequena pausa entre disparos de la maquina para que se alcancen a ver en la UI. */
+    /**
+     * Pequena pausa entre disparos de la maquina para que se alcancen a ver
+     * en la UI. Corre en un hilo aparte (en vez de un PauseTransition, que
+     * se ejecuta dentro del propio hilo de JavaFX) para que el "turno de la
+     * maquina" sea concurrencia real; la accion que retoma el juego se
+     * reenvia al hilo de JavaFX con {@link Platform#runLater}, ya que es el
+     * unico autorizado a tocar el Board/las vistas.
+     */
     private void pauseThen(Runnable action) {
-        PauseTransition pause = new PauseTransition(Duration.seconds(0.6));
-        pause.setOnFinished(event -> action.run());
-        pause.play();
+        Thread turnThread = new Thread(() -> {
+            try {
+                Thread.sleep(600);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+            Platform.runLater(action);
+        }, "machine-turn");
+        turnThread.setDaemon(true);
+        turnThread.start();
     }
 
     private void endGame(String message) {
         phase = GamePhase.FINISHED;
         statusLabel.setText(message);
+        onVerificationAvailabilityChanged.accept(canVerify());
+        gameClock.stop();
         autoSave();
     }
 }
