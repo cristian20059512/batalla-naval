@@ -100,7 +100,20 @@ public class GameController {
         } else {
             preparePlacementQueue();
             updatePlacementStatus();
+            setUpMachine();
         }
+    }
+
+    /**
+     * Coloca la flota de la maquina y crea el MachinePlayer desde que se
+     * entra al juego, no solo cuando el humano termina de colocar la suya:
+     * asi el tablero enemigo ya tiene barcos si se usa la brujula para
+     * verificarlo antes de empezar a disparar, en vez de verse vacio.
+     */
+    private void setUpMachine() {
+        RandomFleetPlacer.placeRandomFleet(machineMainBoard);
+        machine = new MachinePlayer("Maquina", machineMainBoard, new HuntTargetShootingStrategy());
+        mainView.redrawAll();
     }
 
     /**
@@ -129,6 +142,11 @@ public class GameController {
 
             if (phase == GamePhase.PLACEMENT) {
                 updatePlacementStatus();
+                // red de seguridad para partidas guardadas antes de que la
+                // flota de la maquina se colocara desde el arranque.
+                if (machineMainBoard.getFleet() == null) {
+                    setUpMachine();
+                }
                 return;
             }
 
@@ -208,11 +226,12 @@ public class GameController {
      * el nuevo estado para que la vista pueda reflejarlo (p. ej. resaltando
      * el boton mientras el modo esta activo).
      *
-     * HU-3 pide que esta opcion sea "unicamente para fines de verificacion
-     * y no [este disponible] durante el juego normal": mientras la partida
-     * esta en curso (fase JUEGO) el boton queda deshabilitado en la vista
-     * (ver {@link #setOnVerificationAvailabilityChanged}), pero por si se
-     * llegara a invocar de otra forma, aqui tambien se bloquea el cambio.
+     * NOTA: el enunciado (HU-3) pide que esta opcion sea "unicamente para
+     * fines de verificacion y no [este disponible] durante el juego
+     * normal". Por pedido explicito del usuario se dejo sin esa
+     * restriccion (canVerify() ya no revisa la fase): el boton se puede
+     * activar/desactivar en cualquier momento, aunque eso se aparte de la
+     * letra de esa historia de usuario.
      */
     public boolean toggleVerification() {
         if (!canVerify()) {
@@ -230,14 +249,13 @@ public class GameController {
     }
 
     /**
-     * La verificacion del tablero enemigo solo tiene sentido fuera de una
-     * partida activa: antes de que empiece (fase COLOCACION, aunque ahi el
-     * tablero enemigo todavia esta vacio) o despues de que termine (fase
-     * FIN, para que el profesor revise que todo quedo bien). Durante la
-     * fase JUEGO se bloquea para que no sea una forma de hacer trampa.
+     * Siempre disponible (ver nota en {@link #toggleVerification()}). Se
+     * deja el metodo (en vez de eliminarlo) para no desarmar el mecanismo
+     * de aviso a la vista (setOnVerificationAvailabilityChanged) por si se
+     * decide restaurar la restriccion mas adelante.
      */
     private boolean canVerify() {
-        return phase != GamePhase.PLAYING;
+        return true;
     }
 
     /**
@@ -276,13 +294,24 @@ public class GameController {
         gameClock.stop();
     }
 
-    /** Invocado por el boton "Colocar flota aleatoria": atajo para no colocar barco por barco. */
+    /**
+     * Invocado por el boton "Colocar flota aleatoria": atajo para no
+     * colocar barco por barco. Solo coloca al azar los barcos que todavia
+     * faltan en la cola (los ya puestos a mano se quedan donde estan): si
+     * llamara a RandomFleetPlacer.placeRandomFleet directamente, este crea
+     * una flota nueva de 10 barcos y los agregaria encima de los que ya
+     * estaban colocados, dejando mas de 10 barcos en el tablero.
+     */
     public void placeRandomFleet() {
         if (phase != GamePhase.PLACEMENT) {
             return;
         }
+        List<Ship> remainingShips = new ArrayList<>();
+        for (ShipType type : placementQueue) {
+            remainingShips.add(ShipFactory.create(type));
+        }
         placementQueue.clear();
-        RandomFleetPlacer.placeRandomFleet(humanPositionBoard);
+        RandomFleetPlacer.placeShipsRandomly(humanPositionBoard, remainingShips);
         positionView.redrawAll();
         startGamePhase();
     }
@@ -357,9 +386,13 @@ public class GameController {
 
         human = new HumanPlayer(GameSession.getHumanNickname(), humanPositionBoard);
 
-        RandomFleetPlacer.placeRandomFleet(machineMainBoard);
-        machine = new MachinePlayer("Maquina", machineMainBoard, new HuntTargetShootingStrategy());
-        mainView.redrawAll();
+        // La flota de la maquina ya se coloca al entrar al juego
+        // (setUpMachine, en el constructor); esto es solo una red de
+        // seguridad por si se cargo una partida guardada antigua que quedo
+        // en fase de colocacion antes de ese cambio.
+        if (machine == null) {
+            setUpMachine();
+        }
 
         turn = GameTurn.HUMAN;
         statusLabel.setText("Flota lista. Es tu turno: dispara en el tablero enemigo.");

@@ -80,17 +80,18 @@ public class MainController {
 
     /**
      * Atajos de teclado: R gira el barco actual, ESPACIO coloca la flota
-     * aleatoria y ESCAPE alterna la verificacion del tablero enemigo (los
-     * mismos tres botones/acciones ya existentes, solo que accesibles sin
-     * mouse). placeRandomFleet() y toggleVerification() ya validan
-     * internamente si la accion aplica a la fase actual, asi que es seguro
-     * invocarlos en cualquier momento.
+     * aleatoria, V alterna la verificacion del tablero enemigo y ESCAPE
+     * vuelve al menu principal (los mismos botones/acciones ya existentes,
+     * solo que accesibles sin mouse). placeRandomFleet() y
+     * toggleVerification() ya validan internamente si la accion aplica a
+     * la fase actual, asi que es seguro invocarlos en cualquier momento.
      */
     private void onKeyPressed(KeyEvent event) {
         switch (event.getCode()) {
             case R -> gameController.toggleOrientation();
             case SPACE -> gameController.placeRandomFleet();
-            case ESCAPE -> onToggleVerification();
+            case V -> onToggleVerification();
+            case ESCAPE -> onBackToMenu();
             default -> { }
         }
     }
@@ -124,7 +125,12 @@ public class MainController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/batallanaval/view/start-view.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) statusLabel.getScene().getWindow();
-            stage.setScene(new Scene(root, 900, 650));
+            // start-view.fxml usa anclajes fijos pensados para el tamano con
+            // el que Main.java la carga la primera vez (1280x690); si se
+            // reabre con el tamano de la pantalla de juego (900x650) los
+            // botones anclados quedan sin espacio y se ven rotos/incompletos.
+            stage.setScene(new Scene(root, 1280, 690));
+            stage.setResizable(false);
         } catch (IOException e) {
             LOG.log(Level.SEVERE, "No se pudo volver al menu principal.", e);
             statusLabel.setText("No se pudo volver al menu: " + e.getMessage());
