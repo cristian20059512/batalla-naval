@@ -75,6 +75,7 @@ public class GameController {
     private boolean verificationMode = false;
 
     private Consumer<Boolean> onVerificationAvailabilityChanged = available -> { };
+    private Consumer<Boolean> onPlacementAvailabilityChanged = available -> { };
 
     public GameController(Pane positionContainer, Pane mainContainer, Label statusLabel, Label timerLabel) {
         this.statusLabel = statusLabel;
@@ -251,6 +252,30 @@ public class GameController {
         this.onVerificationAvailabilityChanged.accept(canVerify());
     }
 
+    /**
+     * Permite que la vista deshabilite "Girar barco" y "Colocar flota
+     * aleatoria" en cuanto termina la fase de colocacion (heuristica de
+     * usabilidad "prevencion de errores": sin esto, esos botones quedaban
+     * activos pero sin efecto durante la partida, un clic que no hace nada
+     * y no explica por que). Se avisa de inmediato con el estado actual al
+     * registrarse, igual que {@link #setOnVerificationAvailabilityChanged}.
+     */
+    public void setOnPlacementAvailabilityChanged(Consumer<Boolean> callback) {
+        this.onPlacementAvailabilityChanged = callback != null ? callback : available -> { };
+        this.onPlacementAvailabilityChanged.accept(phase == GamePhase.PLACEMENT);
+    }
+
+    /**
+     * Libera los recursos de esta partida (el hilo del cronometro) para que
+     * se pueda volver al menu principal sin dejar un hilo huerfano
+     * actualizando una vista que ya no esta en pantalla (heuristica de
+     * usabilidad "control y libertad del usuario": salir de la partida en
+     * curso sin tener que cerrar toda la aplicacion).
+     */
+    public void shutdown() {
+        gameClock.stop();
+    }
+
     /** Invocado por el boton "Colocar flota aleatoria": atajo para no colocar barco por barco. */
     public void placeRandomFleet() {
         if (phase != GamePhase.PLACEMENT) {
@@ -339,6 +364,7 @@ public class GameController {
         turn = GameTurn.HUMAN;
         statusLabel.setText("Flota lista. Es tu turno: dispara en el tablero enemigo.");
         onVerificationAvailabilityChanged.accept(canVerify());
+        onPlacementAvailabilityChanged.accept(false);
         gameClock.start();
         autoSave();
     }
