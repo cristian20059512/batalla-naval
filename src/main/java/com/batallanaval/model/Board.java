@@ -12,14 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Tablero de 10x10 casillas. Contiene la logica de negocio de colocacion de
- * barcos (HU-1) y de disparos (HU-2/HU-4): validaciones, deteccion de
- * agua/tocado/hundido, y notificacion a la vista via el patron Observer
- * (ver {@link BoardListener}).
+ * A 10x10 board. Holds the business logic for placing ships (HU-1) and for
+ * shooting (HU-2/HU-4): validations, water/hit/sunk detection, and
+ * notifying the view via the Observer pattern (see {@link BoardListener}).
  *
- * La misma clase sirve tanto para el tablero de posicion del jugador humano
- * como para el tablero principal (propio de la maquina o del humano segun
- * quien dispare), ya que ambos son, en esencia, un grid 10x10 con una flota.
+ * The same class serves both the human player's placement board and the
+ * main board (the machine's or the human's, depending on who is firing),
+ * since both are, in essence, a 10x10 grid with a fleet on it.
  */
 public class Board implements Serializable {
 
@@ -70,10 +69,10 @@ public class Board implements Serializable {
     }
 
     /**
-     * Coloca un barco en el tablero validando las reglas de HU-1: dentro
-     * del tablero y sin superposicion con otro barco ya colocado.
-     * Una vez colocado, el barco no puede volver a colocarse (no se provee
-     * metodo de "mover"), cumpliendo la definicion de hecho de HU-1.
+     * Places a ship on the board, validating HU-1's rules: within the board
+     * and without overlapping another ship already placed.
+     * Once placed, a ship cannot be placed again (no "move" method is
+     * provided), meeting HU-1's definition of done.
      */
     public void placeShip(Ship ship, Coordinate start, Orientation orientation)
             throws InvalidPlacementException {
@@ -109,9 +108,9 @@ public class Board implements Serializable {
     }
 
     /**
-     * Procesa un disparo sobre la coordenada indicada (HU-2/HU-4).
-     * Devuelve el resultado (AGUA, TOCADO o HUNDIDO) y notifica a los
-     * listeners registrados para que la vista se actualice en tiempo real.
+     * Processes a shot at the given coordinate (HU-2/HU-4).
+     * Returns the result (WATER, HIT, or SUNK) and notifies the registered
+     * listeners so the view updates in real time.
      */
     public ShotResult shoot(Coordinate coordinate) {
         if (!coordinate.isWithinBoard(SIZE)) {
@@ -145,10 +144,9 @@ public class Board implements Serializable {
     }
 
     /**
-     * Cuando un barco se hunde, todas sus casillas (incluidas las que ya
-     * estaban en TOCADO) pasan a mostrarse como HUNDIDO, tal como pide el
-     * enunciado ("aparecera en el tablero el barco completo con la marca
-     * indicativa de que ha sido hundido").
+     * When a ship sinks, all of its cells (including the ones already
+     * marked HIT) switch to showing SUNK, as the assignment requires ("the
+     * whole ship will appear on the board marked as sunk").
      */
     private void markShipSunk(Ship ship) {
         for (Coordinate coordinate : ship.getPositions()) {
@@ -163,11 +161,11 @@ public class Board implements Serializable {
     }
 
     /**
-     * Copia el estado (celdas y flota) de un tablero recien deserializado
-     * dentro de este tablero ya construido, en vez de reemplazar la
-     * instancia. Asi los listeners ya registrados (la vista JavaFX) y la
-     * referencia final a este {@code Board} siguen siendo validos despues
-     * de cargar una partida guardada.
+     * Copies the state (cells and fleet) of a freshly deserialized board
+     * into this already-constructed board, instead of replacing the
+     * instance. This way, the listeners already registered (the JavaFX
+     * view) and the final reference to this {@code Board} remain valid
+     * after loading a saved game.
      */
     public void restoreState(Board source) {
         for (int row = 0; row < SIZE; row++) {

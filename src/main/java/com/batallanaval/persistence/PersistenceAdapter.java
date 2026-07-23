@@ -3,12 +3,12 @@ package com.batallanaval.persistence;
 import com.batallanaval.exception.PersistenceException;
 
 /**
- * Puerto comun (patron Adapter) que el resto de la aplicacion usa para
- * guardar y cargar datos, sin conocer el mecanismo de E/S real detras.
- * Cada implementacion "adapta" una tecnologia de persistencia distinta
- * (serializacion binaria, archivo de texto plano, etc.) a esta misma
- * interfaz, de modo que quien la consume (GamePersistenceManager) puede
- * tratarlas de forma intercambiable.
+ * Common port (Adapter pattern) the rest of the application uses to save
+ * and load data, without knowing the actual I/O mechanism behind it. Each
+ * implementation "adapts" a different persistence technology (binary
+ * serialization, plain text file, etc.) to this same interface, so that
+ * whoever consumes it (GamePersistenceManager) can treat them
+ * interchangeably.
  */
 public interface PersistenceAdapter<T> {
 

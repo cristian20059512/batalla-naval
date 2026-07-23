@@ -1,10 +1,10 @@
 package com.batallanaval.persistence;
 
 /**
- * Resumen legible de la partida (nickname y conteo de barcos hundidos por
- * bando). No implementa {@code Serializable}: se guarda como texto plano
- * clave=valor a traves de {@link PlainTextSummaryAdapter}, no con
- * serializacion binaria.
+ * Human-readable game summary (nickname and count of sunk ships per side).
+ * Does not implement {@code Serializable}: it is saved as plain text
+ * key=value pairs via {@link PlainTextSummaryAdapter}, not through binary
+ * serialization.
  */
 public class GameSummary {
 

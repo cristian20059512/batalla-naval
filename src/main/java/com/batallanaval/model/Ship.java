@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Representa un barco de la flota. Es abstracta: cada subclase concreta
- * (AircraftCarrier, Submarine, Destroyer, Frigate) solo fija su ShipType;
- * toda la logica de impactos y hundimiento vive aqui.
+ * Represents a ship in the fleet. It is abstract: each concrete subclass
+ * (AircraftCarrier, Submarine, Destroyer, Frigate) only sets its ShipType;
+ * all the hit and sinking logic lives here.
  */
 public abstract class Ship implements Serializable {
 
@@ -29,9 +29,9 @@ public abstract class Ship implements Serializable {
     }
 
     /**
-     * Asigna las casillas que ocupa el barco en el tablero. Se llama una
-     * sola vez durante la fase de colocacion; despues de esto el barco
-     * queda fijo (no se puede mover ni modificar, segun HU-1).
+     * Assigns the cells the ship occupies on the board. Called only once
+     * during the placement phase; after this the ship stays fixed (it
+     * cannot be moved or modified, per HU-1).
      */
     public void place(Coordinate start, Orientation orientation) {
         this.orientation = orientation;
@@ -42,8 +42,8 @@ public abstract class Ship implements Serializable {
     }
 
     /**
-     * Registra que se recibio un disparo en la coordenada indicada.
-     * Precondicion: la coordenada pertenece a este barco (occupiesCoordinate).
+     * Records that a shot was received at the given coordinate.
+     * Precondition: the coordinate belongs to this ship (occupiesCoordinate).
      */
     public void receiveHit(Coordinate coordinate) {
         hits.add(coordinate);

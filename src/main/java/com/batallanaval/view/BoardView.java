@@ -28,16 +28,16 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Representacion visual de un {@link Board} usando figuras 2D de JavaFX
- * (Rectangle, Circle, Line, Polygon). Se registra como {@link BoardListener}
- * para repintar automaticamente la celda que cambio, sin que el modelo
- * conozca nada de JavaFX (Observer).
+ * Visual representation of a {@link Board} using JavaFX 2D shapes
+ * (Rectangle, Circle, Line, Polygon). It registers as a {@link BoardListener}
+ * to automatically repaint the cell that changed, without the model
+ * knowing anything about JavaFX (Observer).
  *
- * Si es el tablero propio (de posicion) siempre muestra los barcos.
- * Si es el tablero del oponente, los barcos permanecen ocultos hasta que
- * son tocados/hundidos, salvo que se active el modo de verificacion (HU-3).
- * Los barcos propios se dibujan en tonos cafe/madera y los del oponente en
- * tonos azules, para hacer juego con la pantalla inicial.
+ * If this is the own (placement) board, it always shows the ships.
+ * If it is the opponent's board, ships stay hidden until they are
+ * hit/sunk, unless verification mode is turned on (HU-3). Own ships are
+ * drawn in brown/wood tones and the opponent's in blue tones, to match the
+ * start screen.
  */
 public class BoardView implements BoardListener {
 
@@ -118,11 +118,11 @@ public class BoardView implements BoardListener {
     }
 
     /**
-     * Clase interna (no estatica: necesita los campos onCellClick/
-     * onCellHoverEnter/onCellHoverExit de su BoardView) que agrupa el manejo
-     * de los tres eventos de mouse de una celda (click, entra, sale) en un
-     * unico {@link EventHandler}, en vez de repetir tres lambdas casi
-     * identicas por cada una de las 100 celdas del tablero.
+     * Inner class (not static: it needs the onCellClick/onCellHoverEnter/
+     * onCellHoverExit fields of its BoardView) that groups handling a
+     * cell's three mouse events (click, enter, exit) into a single
+     * {@link EventHandler}, instead of repeating three nearly identical
+     * lambdas for each of the board's 100 cells.
      */
     private class CellInteractionHandler implements EventHandler<MouseEvent> {
 
@@ -154,22 +154,22 @@ public class BoardView implements BoardListener {
         this.onCellClick = handler;
     }
 
-    /** Se dispara cuando el mouse entra en una celda (para previsualizar la colocacion de un barco, HU-1). */
+    /** Fires when the mouse enters a cell (to preview ship placement, HU-1). */
     public void setOnCellHoverEnter(Consumer<Coordinate> handler) {
         this.onCellHoverEnter = handler;
     }
 
-    /** Se dispara cuando el mouse sale de una celda (para limpiar la previsualizacion). */
+    /** Fires when the mouse leaves a cell (to clear the preview). */
     public void setOnCellHoverExit(Consumer<Coordinate> handler) {
         this.onCellHoverExit = handler;
     }
 
     /**
-     * Muestra un "fantasma" translucido del barco que se va a colocar (con
-     * su forma real, no un cuadro liso) en las casillas indicadas: verde si
-     * la posicion es valida, rojo si queda fuera del tablero o se superpone
-     * con otro barco. No modifica el estado real de esas celdas, es solo
-     * una previsualizacion.
+     * Shows a translucent "ghost" of the ship about to be placed (with its
+     * real shape, not a plain square) on the given cells: green if the
+     * position is valid, red if it falls outside the board or overlaps
+     * another ship. It does not modify the actual state of those cells,
+     * it is only a preview.
      */
     public void showPlacementPreview(List<Coordinate> coordinates, ShipType type, Orientation orientation,
                                       boolean valid) {
@@ -201,7 +201,7 @@ public class BoardView implements BoardListener {
         }
     }
 
-    /** Quita cualquier previsualizacion de colocacion activa. */
+    /** Removes any active placement preview. */
     public void clearPreview() {
         for (Node shape : activePreviewShapes) {
             StackPane parent = (StackPane) shape.getParent();
@@ -290,12 +290,12 @@ public class BoardView implements BoardListener {
     }
 
     /**
-     * Dibuja la silueta del barco al que pertenece esta casilla, con
-     * figuras 2D (sin imagenes): cada tipo de barco tiene una forma
-     * distinta (fragata, destructor, submarino, portaaviones), coloreada
-     * en tonos cafe si es la flota propia o azules si es la enemiga. La
-     * silueta se dibuja siempre "apuntando a la derecha" y despues se rota
-     * segun la orientacion real del barco (HU-1: arriba/abajo/izq/der).
+     * Draws the silhouette of the ship this cell belongs to, with 2D
+     * shapes (no images): each ship type has a distinct shape (frigate,
+     * destroyer, submarine, aircraft carrier), colored in brown tones if
+     * it is the own fleet or blue tones if it is the enemy's. The
+     * silhouette is always drawn "pointing right" and then rotated
+     * according to the ship's actual orientation (HU-1: up/down/left/right).
      */
     private Node createShipDetail(Cell cell) {
         Ship ship = cell.getShip();
@@ -316,19 +316,19 @@ public class BoardView implements BoardListener {
     }
 
     /**
-     * Orienta la silueta (dibujada apuntando a la izquierda, con el mastil
-     * arriba del casco) segun la direccion real del barco.
+     * Orients the silhouette (drawn pointing left, with the mast above the
+     * hull) according to the ship's actual direction.
      *
-     * DOWN/UP se resuelven con una rotacion de 90/270 grados: el barco
-     * queda "acostado de lado", con el mastil apuntando hacia un costado
-     * en vez de hacia arriba, pero sigue siendo una rotacion limpia.
+     * DOWN/UP are resolved with a 90/270 degree rotation: the ship ends up
+     * "lying on its side," with the mast pointing sideways instead of up,
+     * but it is still a clean rotation.
      *
-     * LEFT necesitaria una rotacion de 180 grados, pero eso voltea el
-     * barco de arriba a abajo ademas de invertirlo de lado a lado (el
-     * mastil terminaria apuntando hacia abajo, debajo del casco: "patas
-     * arriba"). En vez de rotar, se refleja horizontalmente (se invierte
-     * el eje X): la proa apunta al otro lado sin tocar el eje vertical,
-     * asi el mastil se queda siempre arriba del casco.
+     * LEFT would need a 180 degree rotation, but that flips the ship
+     * upside down in addition to mirroring it side to side (the mast
+     * would end up pointing down, below the hull: "upside down"). Instead
+     * of rotating, it is mirrored horizontally (the X axis is flipped):
+     * the bow points the other way without touching the vertical axis, so
+     * the mast always stays above the hull.
      */
     private void applyOrientation(Group shape, Orientation orientation) {
         switch (orientation) {
@@ -348,7 +348,7 @@ public class BoardView implements BoardListener {
         }
     }
 
-    /** La fragata ocupa una sola casilla: un bote con mastil y vela. */
+    /** The frigate occupies a single cell: a boat with a mast and sail. */
     private Group createFrigateShape(Color hull, Color hullDark, Color accent) {
         Polygon hullShape = new Polygon(-9.0, 5.0, 9.0, 5.0, 6.0, 13.0, -6.0, 13.0);
         hullShape.setFill(hull);
@@ -373,22 +373,22 @@ public class BoardView implements BoardListener {
     }
 
     /**
-     * Cuanto se extiende el casco mas alla del borde de su propia casilla
-     * (16px) hacia el lado donde conecta con la siguiente casilla del mismo
-     * barco. El espacio entre casillas es de 2px; extendiendo 2px de mas
-     * (hasta llegar justo al borde de la casilla vecina) el casco de ambas
-     * casillas se toca sin dejar espacio en blanco entre ellas.
+     * How far the hull extends past its own cell's edge (16px) on the
+     * side where it connects to the next cell of the same ship. The gap
+     * between cells is 2px; by extending 2px further (reaching right up
+     * to the neighboring cell's edge) both cells' hulls touch without
+     * leaving a blank gap between them.
      */
     private static final double HULL_BRIDGE = 18.0;
     private static final double HULL_EDGE = 14.0;
 
     /**
-     * Los demas tipos ocupan varias casillas: la primera (proa) es un
-     * casco en punta, la ultima (popa) tiene la estructura propia del
-     * tipo de barco, y las de en medio llevan un detalle menor. El lado
-     * que conecta con la siguiente casilla del barco se extiende
-     * (ver {@link #HULL_BRIDGE}) para que el casco se vea de una sola
-     * pieza en vez de cortado por el espacio entre casillas.
+     * The other types occupy several cells: the first one (bow) is a
+     * pointed hull, the last one (stern) has the ship type's own
+     * structure, and the ones in the middle carry a minor detail. The
+     * side that connects to the next cell of the ship extends out (see
+     * {@link #HULL_BRIDGE}) so the hull looks like a single piece instead
+     * of cut off by the gap between cells.
      */
     private Group createSegmentShape(ShipType type, int index, int size, Color hull, Color hullDark, Color accent) {
         Group group = new Group();
@@ -424,10 +424,11 @@ public class BoardView implements BoardListener {
     }
 
     /**
-     * La casilla tiene 32px de lado (16px de cada lado del centro), asi
-     * que toda figura debe quedar dentro de ese rango o se sale de su
-     * casilla y arruina el dibujo. El casco ya ocupa hasta y=-9; estas
-     * estructuras usan solo el espacio libre entre y=-9 y el borde y=-16.
+     * The cell is 32px on each side (16px from the center to each edge),
+     * so every shape must stay within that range or it will spill out of
+     * its cell and ruin the drawing. The hull already occupies up to
+     * y=-9; these structures only use the free space between y=-9 and the
+     * y=-16 edge.
      */
     private Node createSternStructure(ShipType type, Color accent) {
         switch (type) {

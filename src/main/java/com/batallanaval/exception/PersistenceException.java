@@ -1,10 +1,9 @@
 package com.batallanaval.exception;
 
 /**
- * Excepcion marcada (checked): envuelve cualquier fallo de lectura/escritura
- * al guardar o cargar el estado de la partida (archivos serializables o
- * archivos planos). Checked porque el fallo de IO siempre debe ser
- * capturado y comunicado al usuario, nunca ignorado.
+ * Checked exception: wraps any read/write failure when saving or loading the
+ * game state (serializable files or plain text files). It is checked because
+ * an IO failure must always be caught and reported to the user, never ignored.
  */
 public class PersistenceException extends Exception {
 

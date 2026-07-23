@@ -4,11 +4,10 @@ import com.batallanaval.util.Coordinate;
 import com.batallanaval.util.CellState;
 
 /**
- * Patron Observer: quien implemente esta interfaz (tipicamente un
- * controlador de vista JavaFX) sera notificado cada vez que una celda del
- * {@link Board} cambia de estado, sin que el modelo conozca nada de JavaFX.
- * Esto es lo que permite "programacion orientada a eventos" desacoplada
- * de la logica del juego.
+ * Observer pattern: whoever implements this interface (typically a JavaFX
+ * view controller) is notified every time a {@link Board} cell changes
+ * state, without the model knowing anything about JavaFX. This is what
+ * enables "event-oriented programming" decoupled from the game logic.
  */
 public interface BoardListener {
 

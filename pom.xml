@@ -63,6 +63,37 @@
                     <useModulePath>false</useModulePath>
                 </configuration>
             </plugin>
+            <plugin>
+                <!-- genera el Javadoc en HTML (mvn javadoc:javadoc) en
+                     javadoc/, en la raiz del proyecto (no en target/, que
+                     esta en .gitignore y desaparece con cada "mvn clean")
+                     para que quede committeado y visible en el repo.
+                     Doclint desactivado porque el proyecto no sigue
+                     al pie de la letra todas las reglas estrictas de
+                     formato de Javadoc (por ejemplo, HTML sin cerrar en
+                     algunos comentarios), que harian fallar la generacion
+                     sin aportar nada al contenido. -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.6.3</version>
+                <configuration>
+                    <doclint>none</doclint>
+                    <detectJavaApiLink>false</detectJavaApiLink>
+                    <doctitle>Batalla Naval - API Documentation</doctitle>
+                    <reportOutputDirectory>${project.basedir}</reportOutputDirectory>
+                    <destDir>javadoc</destDir>
+                    <!-- module-info.java hace que javadoc entre en "modo
+                         modulo" y, en ese modo, solo documenta lo que el
+                         modulo exporta (com.batallanaval, el paquete de
+                         Main) dejando afuera el resto (ai, controller,
+                         model, persistence, util, view). Excluirlo del
+                         set de archivos que procesa javadoc evita ese
+                         modo y documenta todos los paquetes por igual. -->
+                    <sourceFileExcludes>
+                        <sourceFileExclude>module-info.java</sourceFileExclude>
+                    </sourceFileExcludes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

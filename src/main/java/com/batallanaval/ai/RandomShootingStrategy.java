@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Estrategia de disparo aleatoria: elige al azar entre las casillas que
- * todavia no han sido disparadas. Cumple el requisito minimo de HU-4
- * ("La maquina selecciona casillas de disparo de manera aleatoria").
+ * Random shooting strategy: picks at random among the cells that have not
+ * been fired at yet. Meets HU-4's minimum requirement ("The machine
+ * selects shooting cells randomly").
  */
 public class RandomShootingStrategy implements ShootingStrategy {
 

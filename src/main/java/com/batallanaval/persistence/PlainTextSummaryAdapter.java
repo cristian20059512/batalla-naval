@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Adaptador (patron Adapter) que expone el guardado del resumen de la
- * partida (nickname y barcos hundidos) a traves de {@link PersistenceAdapter},
- * delegando en lectura/escritura de texto plano linea por linea
- * ({@code clave=valor}). Cumple exactamente el mismo contrato que
- * {@link SerializedStateAdapter} aunque el formato de almacenamiento es
- * completamente distinto (texto legible en vez de binario), que es la idea
- * del patron: el resto de la app no distingue entre ambos.
+ * Adapter (Adapter pattern) that exposes saving the game summary (nickname
+ * and sunk ships) through {@link PersistenceAdapter}, delegating to
+ * line-by-line plain text reading/writing ({@code key=value}). It follows
+ * exactly the same contract as {@link SerializedStateAdapter} even though
+ * the storage format is completely different (readable text instead of
+ * binary), which is the whole point of the pattern: the rest of the app
+ * cannot tell the two apart.
  */
 public class PlainTextSummaryAdapter implements PersistenceAdapter<GameSummary> {
 

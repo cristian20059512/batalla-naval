@@ -3,18 +3,17 @@ package com.batallanaval.util;
 import java.io.Serializable;
 
 /**
- * Estado en el que puede encontrarse una celda del tablero en cualquier
- * momento de la partida.
+ * State a board cell can be in at any point during the game.
  */
 public enum CellState implements Serializable {
-    /** No se ha disparado y no hay barco (o el jugador no lo sabe aun). */
+    /** No shot has been fired and there is no ship (or the player doesn't know yet). */
     EMPTY,
-    /** Hay un barco propio colocado, sin disparos (solo visible en tablero de posicion). */
+    /** An own ship is placed here, with no shots fired (only visible on the placement board). */
     SHIP,
-    /** Se disparo y no habia barco. */
+    /** A shot was fired and there was no ship. */
     WATER,
-    /** Se disparo y habia barco, pero el barco no esta completamente hundido. */
+    /** A shot was fired and there was a ship, but it is not fully sunk yet. */
     HIT,
-    /** Se disparo y esa parte pertenece a un barco ya completamente hundido. */
+    /** A shot was fired and this part belongs to a ship that is already fully sunk. */
     SUNK
 }

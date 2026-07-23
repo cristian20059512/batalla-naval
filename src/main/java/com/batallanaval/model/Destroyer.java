@@ -2,7 +2,7 @@ package com.batallanaval.model;
 
 import com.batallanaval.util.ShipType;
 
-/** Destructor: ocupa 2 casillas. Hay 3 por flota. */
+/** Destroyer: occupies 2 cells. There are 3 per fleet. */
 public class Destroyer extends Ship {
     private static final long serialVersionUID = 1L;
 

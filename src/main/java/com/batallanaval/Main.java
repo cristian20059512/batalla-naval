@@ -11,8 +11,8 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 /**
- * Punto de entrada de la aplicacion Batalla Naval.
- * Carga la vista principal desde FXML y arranca el ciclo de eventos de JavaFX.
+ * Entry point for the Battleship application.
+ * Loads the main view from FXML and starts the JavaFX event loop.
  */
 public class Main extends Application {
 

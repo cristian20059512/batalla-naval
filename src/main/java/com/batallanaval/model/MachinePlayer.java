@@ -4,11 +4,11 @@ import com.batallanaval.ai.ShootingStrategy;
 import com.batallanaval.util.Coordinate;
 
 /**
- * Jugador maquina. Su tablero propio es el "tablero principal" del
- * oponente: se genera automaticamente (flota colocada al azar) y es donde
- * el jugador humano dispara. Delega la eleccion de sus propios disparos
- * (contra el tablero del humano) en una {@link ShootingStrategy}, lo que
- * permite cambiar de comportamiento sin tocar esta clase (patron Strategy).
+ * Machine player. Its own board is the opponent's "main board": it is
+ * generated automatically (fleet placed at random) and is where the human
+ * player fires. It delegates choosing its own shots (against the human's
+ * board) to a {@link ShootingStrategy}, which allows changing its behavior
+ * without touching this class (Strategy pattern).
  */
 public class MachinePlayer extends Player {
 
@@ -22,8 +22,8 @@ public class MachinePlayer extends Player {
     }
 
     /**
-     * Elige la coordenada donde la maquina va a disparar dentro del
-     * tablero del jugador humano, usando la estrategia configurada.
+     * Chooses the coordinate where the machine will fire within the human
+     * player's board, using the configured strategy.
      */
     public Coordinate chooseTarget(Board humanBoard) {
         return shootingStrategy.chooseShot(humanBoard);

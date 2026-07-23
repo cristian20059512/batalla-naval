@@ -32,23 +32,23 @@ import java.util.Random;
 import java.util.function.Consumer;
 
 /**
- * Representacion visual 3D de un {@link Board} (reemplaza a la version 2D,
- * {@link BoardView}, que se deja en el proyecto sin usar). Cada celda es
- * una placa (Box) sobre el plano XZ; los barcos son grupos de Box,
- * Cylinder y Sphere posicionados y rotados en el espacio; una
- * PerspectiveCamera y un par de luces (AmbientLight + PointLight) permiten
- * verlos, siguiendo el mismo enfoque del capitulo "Understanding 3D
- * Shapes" de Learn JavaFX 17. Todo vive dentro de un SubScene, que es un
- * Node como cualquier otro y por eso se puede insertar en el layout 2D del
- * resto de la aplicacion (FXML) sin cambiar nada mas alli.
+ * 3D visual representation of a {@link Board} (replaces the 2D version,
+ * {@link BoardView}, which is left in the project unused). Each cell is a
+ * plate (Box) on the XZ plane; ships are groups of Box, Cylinder, and
+ * Sphere positioned and rotated in space; a PerspectiveCamera and a couple
+ * of lights (AmbientLight + PointLight) make them visible, following the
+ * same approach as the "Understanding 3D Shapes" chapter of Learn JavaFX
+ * 17. Everything lives inside a SubScene, which is a Node like any other
+ * and can therefore be inserted into the rest of the application's 2D
+ * layout (FXML) without changing anything else there.
  *
- * Se registra como {@link BoardListener} igual que la version 2D, para
- * repintar automaticamente la celda que cambio sin que el modelo conozca
- * nada de JavaFX (Observer).
+ * It registers as a {@link BoardListener} just like the 2D version, to
+ * automatically repaint the cell that changed without the model knowing
+ * anything about JavaFX (Observer).
  *
- * Si es el tablero propio (de posicion) siempre muestra los barcos. Si es
- * el tablero del oponente, los barcos permanecen ocultos hasta que son
- * tocados/hundidos, salvo que se active el modo de verificacion (HU-3).
+ * If this is the own (placement) board, it always shows the ships. If it
+ * is the opponent's board, ships stay hidden until they are hit/sunk,
+ * unless verification mode is turned on (HU-3).
  */
 public class Board3DView implements BoardListener {
 
@@ -124,16 +124,16 @@ public class Board3DView implements BoardListener {
     private final Random ambientRandom = new Random(20260720L);
 
     /**
-     * Cuanto se extiende el casco mas alla del borde de su propia casilla
-     * hacia el lado donde conecta con la siguiente casilla del mismo
-     * barco, para que el casco se vea de una sola pieza en vez de cortado
-     * por el pequeno espacio entre placas (misma idea que en la version
-     * 2D, adaptada de Polygon/Rectangle a Box). Calibrado originalmente
-     * para CELL_SIZE=40 (22 y 16); se escala aqui por CELL_SIZE/40 para
-     * que siga cerrando el espacio entre segmentos si vuelve a cambiar el
-     * tamano de celda, en vez de quedar fijo para un tamano que ya no es
-     * el actual (eso fue justo lo que dejo un hueco visible entre los dos
-     * segmentos del destructor al agrandar el tablero a CELL_SIZE=55).
+     * How far the hull extends past its own cell's edge on the side where
+     * it connects to the next cell of the same ship, so the hull looks
+     * like a single piece instead of cut off by the small gap between
+     * plates (same idea as in the 2D version, adapted from
+     * Polygon/Rectangle to Box). Originally calibrated for CELL_SIZE=40 (22
+     * and 16); it is scaled here by CELL_SIZE/40 so it keeps closing the
+     * gap between segments if the cell size changes again, instead of
+     * staying fixed for a size that is no longer current (that is exactly
+     * what left a visible gap between the destroyer's two segments when
+     * the board was enlarged to CELL_SIZE=55).
      */
     private static final double HULL_BRIDGE = 22.0 * (CELL_SIZE / 40.0);
     private static final double HULL_EDGE = 16.0 * (CELL_SIZE / 40.0);
@@ -164,17 +164,17 @@ public class Board3DView implements BoardListener {
     private static final double ORBIT_RADIUS_MIN = BOARD_SPAN * 0.85;
     private static final double ORBIT_RADIUS_MAX = BOARD_SPAN * 2.0;
     /**
-     * Limites de inclinacion (en grados). No se deja llegar a 0 (vista
-     * totalmente horizontal, rasante) ni a 90 (vista totalmente cenital) y
-     * mucho menos pasar de ahi, porque pasado el cenit la camara terminaria
-     * mirando la cara de ABAJO del tablero (justo lo que el usuario pidio
-     * evitar: "sin poder pasarme para la otra cara").
+     * Elevation limits (in degrees). The camera is not allowed to reach 0
+     * (fully horizontal, grazing view) or 90 (fully overhead view), let
+     * alone go past that, because past the zenith the camera would end up
+     * looking at the board's BOTTOM face (exactly what the user asked to
+     * avoid: "without being able to go over to the other side").
      */
     private static final double ELEVATION_MIN_DEG = 15.0;
     private static final double ELEVATION_MAX_DEG = 82.0;
-    /** Cuantos grados gira/inclina la vista por cada pixel arrastrado. */
+    /** How many degrees the view turns/tilts per pixel dragged. */
     private static final double DRAG_SENSITIVITY = 0.4;
-    /** Cuanto se acerca/aleja la camara por cada "click" de la rueda del mouse. */
+    /** How much the camera zooms in/out per mouse wheel "click". */
     private static final double ZOOM_SENSITIVITY = 0.6;
 
     private double azimuthDeg = 0.0;
@@ -208,14 +208,13 @@ public class Board3DView implements BoardListener {
     }
 
     /**
-     * Placas del oceano: mismo Box low poly que las casillas del tablero,
-     * en un mosaico mas grande que lo rodea (incluyendo debajo del propio
-     * tablero, visible por los pequenos espacios entre placas). Cada placa
-     * tiene un tono al azar de {@link #OCEAN_PALETTE} y una altura un poco
-     * distinta a sus vecinas (ver {@link #OCEAN_JITTER_Y}), asi las caras
-     * laterales entre placas de distinta altura quedan a la vista como
-     * "acantilados" facetados en vez de una superficie plana de un solo
-     * color.
+     * Ocean plates: the same low-poly Box used for the board's cells, in a
+     * larger mosaic surrounding it (including underneath the board itself,
+     * visible through the small gaps between plates). Each plate has a
+     * random shade from {@link #OCEAN_PALETTE} and a height slightly
+     * different from its neighbors (see {@link #OCEAN_JITTER_Y}), so the
+     * side faces between plates of different heights show up as faceted
+     * "cliffs" instead of a flat, single-colored surface.
      */
     private Group createOcean() {
         Group ocean = new Group();
@@ -236,11 +235,11 @@ public class Board3DView implements BoardListener {
     }
 
     /**
-     * Nubes low poly "bloquey": racimos de 3 cajas de distinto tamano,
-     * repartidos en un anillo alrededor del tablero y bien arriba (ver
-     * {@link #SKY_HEIGHT}), para que se asomen en el fondo de la escena sin
-     * importar el angulo de la camara. El degrade del fondo del SubScene
-     * (ver el constructor) hace de cielo detras de ellas.
+     * "Blocky" low-poly clouds: clusters of 3 boxes of different sizes,
+     * spread over a ring around the board and well above it (see
+     * {@link #SKY_HEIGHT}), so they show up in the scene's background
+     * regardless of the camera's angle. The SubScene's background fill
+     * (see the constructor) acts as the sky behind them.
      */
     private Group createSky() {
         Group sky = new Group();
@@ -278,10 +277,10 @@ public class Board3DView implements BoardListener {
     }
 
     /**
-     * Camara en perspectiva inclinada hacia abajo, orbitando siempre a la
-     * misma distancia y elevacion alrededor del centro del tablero (ver
-     * {@link #updateCameraPosition()}); solo el angulo horizontal
-     * (azimuth) cambia, con el arrastre del mouse.
+     * Perspective camera tilted downward, always orbiting at the same
+     * distance and elevation around the board's center (see
+     * {@link #updateCameraPosition()}); only the horizontal angle
+     * (azimuth) changes, with the mouse drag.
      */
     private PerspectiveCamera createCamera() {
         camera = new PerspectiveCamera(true);
@@ -293,19 +292,19 @@ public class Board3DView implements BoardListener {
     }
 
     /**
-     * Recalcula la posicion y orientacion de la camara a partir de
-     * coordenadas esfericas (radio, elevacion, azimuth) centradas en el
-     * tablero, en vez de guardar traslacion/rotacion sueltas: asi
-     * "orbitar" (cambiar solo el azimuth) no puede desalinear la camara
-     * del centro, sin importar cuanto se arrastre.
+     * Recomputes the camera's position and orientation from spherical
+     * coordinates (radius, elevation, azimuth) centered on the board,
+     * instead of keeping loose translation/rotation values: this way
+     * "orbiting" (changing only the azimuth) can never throw the camera
+     * off-center, no matter how much it is dragged.
      *
-     * El orden de la lista de transforms importa y se verifico
-     * renderizando capturas fuera de pantalla en varios angulos: la
-     * rotacion de azimuth (Y) va primero en la lista y la de elevacion
-     * (X) despues; con el orden invertido, la camara pierde la
-     * inclinacion hacia abajo en cuanto el azimuth se aleja de 0 grados y
-     * termina mirando en linea recta por encima del tablero (pantalla en
-     * blanco, sin tocar la placa de ninguna celda).
+     * The order of the transforms list matters and was verified by
+     * rendering offscreen snapshots at several angles: the azimuth (Y)
+     * rotation goes first in the list and the elevation (X) one after;
+     * with the order reversed, the camera loses its downward tilt as soon
+     * as the azimuth moves away from 0 degrees and ends up looking
+     * straight ahead above the board (blank screen, not touching any
+     * cell's plate).
      */
     private void updateCameraPosition() {
         double elevationRad = Math.toRadians(elevationDeg);
@@ -325,18 +324,17 @@ public class Board3DView implements BoardListener {
     }
 
     /**
-     * Click sostenido + arrastre gira la vista alrededor del tablero (como
-     * girar una mesa): el arrastre horizontal cambia el azimuth (da la
-     * vuelta) y el vertical cambia la inclinacion (sube/baja la camara),
-     * cada uno recortado a su rango valido (ver ELEVATION_MIN_DEG/MAX_DEG)
-     * para no terminar mirando el tablero de canto o por debajo. Ademas la
-     * rueda del mouse acerca/aleja la camara (zoom) dentro de
-     * ORBIT_RADIUS_MIN/MAX. Todo se engancha en el SubScene (no en cada
-     * celda) para que funcione arrastrando/girando la rueda desde cualquier
-     * punto del tablero; un clic normal (sin arrastre) sigue disparando el
-     * MOUSE_CLICKED de la celda igual que antes, porque JavaFX solo emite
-     * ese evento cuando el mouse no se movio mas que un pequeno umbral
-     * entre presionar y soltar.
+     * Click and drag rotates the view around the board (like spinning a
+     * table): a horizontal drag changes the azimuth (turns it around) and
+     * a vertical one changes the elevation (raises/lowers the camera),
+     * each clamped to its valid range (see ELEVATION_MIN_DEG/MAX_DEG) so it
+     * never ends up looking at the board edge-on or from below. The mouse
+     * wheel also zooms the camera in/out within ORBIT_RADIUS_MIN/MAX.
+     * Everything is attached to the SubScene (not to each cell) so it
+     * works when dragging/scrolling from any point on the board; a normal
+     * click (without dragging) still fires a cell's MOUSE_CLICKED just
+     * like before, because JavaFX only emits that event when the mouse
+     * hasn't moved more than a small threshold between press and release.
      */
     private void enableDragToOrbit() {
         subScene.setOnMousePressed(event -> {
@@ -403,11 +401,11 @@ public class Board3DView implements BoardListener {
     }
 
     /**
-     * Clase interna (no estatica: necesita los campos onCellClick/
-     * onCellHoverEnter/onCellHoverExit de su Board3DView) que agrupa el
-     * manejo de los tres eventos de mouse de una celda (click, entra,
-     * sale) en un unico {@link EventHandler}. Un Box (nodo 3D) recibe los
-     * mismos eventos de mouse que cualquier otro Node.
+     * Inner class (not static: it needs the onCellClick/onCellHoverEnter/
+     * onCellHoverExit fields of its Board3DView) that groups handling a
+     * cell's three mouse events (click, enter, exit) into a single
+     * {@link EventHandler}. A Box (3D node) receives the same mouse events
+     * as any other Node.
      */
     private class CellInteractionHandler implements EventHandler<MouseEvent> {
 
@@ -439,21 +437,21 @@ public class Board3DView implements BoardListener {
         this.onCellClick = handler;
     }
 
-    /** Se dispara cuando el mouse entra en una celda (para previsualizar la colocacion de un barco, HU-1). */
+    /** Fires when the mouse enters a cell (to preview ship placement, HU-1). */
     public void setOnCellHoverEnter(Consumer<Coordinate> handler) {
         this.onCellHoverEnter = handler;
     }
 
-    /** Se dispara cuando el mouse sale de una celda (para limpiar la previsualizacion). */
+    /** Fires when the mouse leaves a cell (to clear the preview). */
     public void setOnCellHoverExit(Consumer<Coordinate> handler) {
         this.onCellHoverExit = handler;
     }
 
     /**
-     * Muestra un "fantasma" 3D del barco que se va a colocar en las
-     * casillas indicadas: la placa se tine de verde si la posicion es
-     * valida, de rojo si queda fuera del tablero o se superpone con otro
-     * barco. No modifica el estado real de esas celdas.
+     * Shows a 3D "ghost" of the ship about to be placed on the given
+     * cells: the plate is tinted green if the position is valid, red if
+     * it falls outside the board or overlaps another ship. It does not
+     * modify the actual state of those cells.
      */
     public void showPlacementPreview(List<Coordinate> coordinates, ShipType type, Orientation orientation,
                                       boolean valid) {
@@ -483,7 +481,7 @@ public class Board3DView implements BoardListener {
         }
     }
 
-    /** Quita cualquier previsualizacion de colocacion activa. */
+    /** Removes any active placement preview. */
     public void clearPreview() {
         detailsLayer.getChildren().removeAll(activePreviewShapes);
         activePreviewShapes.clear();
@@ -516,7 +514,7 @@ public class Board3DView implements BoardListener {
         paintCell(coordinate);
     }
 
-    /** Centra el nodo sobre la placa de la celda indicada, apoyado en su superficie superior. */
+    /** Centers the node over the given cell's plate, resting on its top surface. */
     private void placeOnTile(Node node, Coordinate coordinate, double halfHeight) {
         node.setTranslateX(coordinate.getColumn() * CELL_SIZE + CELL_SIZE / 2.0);
         node.setTranslateZ(coordinate.getRow() * CELL_SIZE + CELL_SIZE / 2.0);
@@ -593,12 +591,12 @@ public class Board3DView implements BoardListener {
     }
 
     /**
-     * Arma la silueta 3D del barco al que pertenece esta casilla: cada
-     * tipo de barco tiene una forma distinta y reconocible (portaaviones
-     * con pista de vuelo e isla lateral, submarino con casco cilindrico y
-     * vela, destructor con puente y cañon de proa, fragata con mastil y
-     * vela), coloreada en azul con bandera azul si es la flota propia, o
-     * en rojo con bandera roja si es la enemiga.
+     * Builds the 3D silhouette of the ship this cell belongs to: each ship
+     * type has a distinct, recognizable shape (aircraft carrier with
+     * flight deck and side island, submarine with cylindrical hull and
+     * sail, destroyer with bridge and bow gun, frigate with mast and
+     * sail), colored gray with a blue flag if it is the own fleet, or gray
+     * with a red flag if it is the enemy's.
      */
     private Node createShipDetail(Cell cell) {
         Ship ship = cell.getShip();
@@ -620,13 +618,13 @@ public class Board3DView implements BoardListener {
     }
 
     /**
-     * Orienta el grupo (construido "apuntando" hacia +X, que es la
-     * direccion que corresponde a RIGHT) rotandolo alrededor del eje Y.
-     * A diferencia de la version 2D -que necesitaba invertir el eje X con
-     * una Scale para LEFT, porque un dibujo plano rotado 180 grados queda
-     * "patas arriba"- en 3D basta con rotar 180 grados: el barco es un
-     * objeto real en el espacio, no una silueta plana, asi que girarlo no
-     * lo voltea al reves.
+     * Orients the group (built "pointing" toward +X, which is the
+     * direction corresponding to RIGHT) by rotating it around the Y axis.
+     * Unlike the 2D version -which needed to flip the X axis with a Scale
+     * for LEFT, because a flat drawing rotated 180 degrees ends up
+     * "upside down"- in 3D a 180-degree rotation is enough: the ship is a
+     * real object in space, not a flat silhouette, so rotating it doesn't
+     * flip it over.
      */
     private void applyOrientation(Group shape, Orientation orientation) {
         double angle;
@@ -649,7 +647,7 @@ public class Board3DView implements BoardListener {
         shape.getTransforms().add(new Rotate(angle, Rotate.Y_AXIS));
     }
 
-    /** La fragata ocupa una sola casilla: casco pequeño con caseta, mastil, vela, vigia y bandera. */
+    /** The frigate occupies a single cell: small hull with deckhouse, mast, sail, porthole, and flag. */
     private Group createFrigateShape(Color hull, Color hullDark, Color accent, Color flagColor) {
         // Mismo casco facetado low poly que el resto de la flota (ver
         // HullMeshBuilder): proa en punta (extremo -X angosto) y popa tipo
@@ -689,13 +687,13 @@ public class Board3DView implements BoardListener {
     }
 
     /**
-     * Los demas tipos ocupan varias casillas: la primera (proa) y la
-     * ultima (popa, con la estructura propia del tipo) usan el borde
-     * angosto de su propia casilla; el lado que conecta con la siguiente
-     * casilla se extiende (ver {@link #HULL_BRIDGE}) para que el casco se
-     * vea de una sola pieza. El submarino usa un casco cilindrico en vez
-     * de una caja (mucho mas reconocible); el portaaviones agrega una
-     * pista de vuelo plana sobre cada segmento.
+     * The other types occupy several cells: the first one (bow) and the
+     * last one (stern, with the type's own structure) use their own
+     * cell's narrow edge; the side that connects to the next cell extends
+     * out (see {@link #HULL_BRIDGE}) so the hull looks like a single
+     * piece. The submarine uses a cylindrical hull instead of a box (much
+     * more recognizable); the aircraft carrier adds a flat flight deck on
+     * top of each segment.
      */
     private Group createSegmentShape(ShipType type, int index, int size, Color hull, Color hullDark, Color accent,
                                       Color flagColor) {
@@ -731,13 +729,13 @@ public class Board3DView implements BoardListener {
     }
 
     /**
-     * Casco facetado "low poly" (destructor, portaaviones), armado con
-     * {@link HullMeshBuilder}: seccion transversal pentagonal (quilla en V,
-     * costados abiertos hacia la cubierta) en vez de una caja lisa. El
-     * extremo que da hacia la proa/popa real del barco se angosta casi a
-     * una arista (ver {@link #HULL_EDGE}); el que conecta con el siguiente
-     * segmento se queda en el ancho maximo. Agrega ademas la pista de
-     * vuelo si es un portaaviones.
+     * Faceted "low poly" hull (destroyer, aircraft carrier), built with
+     * {@link HullMeshBuilder}: pentagonal cross-section (V-shaped keel,
+     * sides opening up toward the deck) instead of a plain box. The end
+     * facing the ship's actual bow/stern narrows almost to an edge (see
+     * {@link #HULL_EDGE}); the one connecting to the next segment stays at
+     * maximum width. It also adds the flight deck if it is an aircraft
+     * carrier.
      */
     private Group createFacetedHullSegment(double centerX, double length, Color hull,
                                             boolean isBow, boolean isTail, boolean isCarrier) {
@@ -783,12 +781,12 @@ public class Board3DView implements BoardListener {
     }
 
     /**
-     * Casco cilindrico horizontal del submarino: mucho mas reconocible que
-     * una caja. Con pocas divisiones (8, en vez de las 64 por defecto) el
-     * cilindro queda visiblemente facetado en vez de perfectamente
-     * redondo, para que combine con el estilo low poly del resto de los
-     * barcos (ver el capitulo de formas 3D: menos divisiones = menos
-     * triangulos = superficie mas angulosa).
+     * The submarine's horizontal cylindrical hull: much more recognizable
+     * than a box. With few divisions (8, instead of the default 64) the
+     * cylinder ends up visibly faceted instead of perfectly round, to
+     * match the rest of the fleet's low-poly style (see the 3D shapes
+     * chapter: fewer divisions = fewer triangles = a more angular
+     * surface).
      */
     private Group createSubmarineHullSegment(double centerX, double length, Color hull, Color hullDark) {
         double radius = 8.0;
@@ -807,7 +805,7 @@ public class Board3DView implements BoardListener {
         return new Group(hullCylinder, waterline);
     }
 
-    /** Bandera pequeña (mastil + tela) del color de equipo, para la popa/torre de cada barco. */
+    /** Small flag (pole + cloth) in the team's color, for the stern/tower of each ship. */
     private Group createFlag(Color flagColor) {
         Cylinder pole = new Cylinder(0.4, 7);
         pole.setMaterial(new PhongMaterial(Color.web("#3A2412")));
@@ -820,7 +818,7 @@ public class Board3DView implements BoardListener {
         return new Group(pole, cloth);
     }
 
-    /** Cañon de proa del destructor: torreta esferica + cañon cilindrico apuntando hacia adelante. */
+    /** Destroyer's bow gun: spherical turret + cylindrical barrel pointing forward. */
     private Node createBowGun(Color accent) {
         Sphere turret = new Sphere(3.0);
         turret.setTranslateY(-6);
@@ -938,7 +936,7 @@ public class Board3DView implements BoardListener {
         return porthole;
     }
 
-    /** Marca de agua: una "X" plana de dos barras cruzadas sobre la placa. */
+    /** Water mark: a flat "X" made of two crossed bars over the plate. */
     private Group createWaterMark() {
         PhongMaterial material = new PhongMaterial(Color.WHITE);
 
@@ -959,7 +957,7 @@ public class Board3DView implements BoardListener {
         return sphere;
     }
 
-    /** Marca de hundido: una "X" mas grande y gruesa que la de agua. */
+    /** Sunk mark: a bigger, thicker "X" than the water one. */
     private Group createSunkMark() {
         PhongMaterial material = new PhongMaterial(Color.WHITE);
 

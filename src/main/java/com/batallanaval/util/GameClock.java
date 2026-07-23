@@ -4,15 +4,14 @@ import javafx.application.Platform;
 import javafx.scene.control.Label;
 
 /**
- * Hilo independiente que funciona como cronometro de la partida: cada
- * segundo actualiza (via {@link Platform#runLater}) un {@link Label} con el
- * tiempo transcurrido desde que empezo el turno de disparos.
+ * Independent thread that works as the game's stopwatch: every second it
+ * updates (via {@link Platform#runLater}) a {@link Label} with the time
+ * elapsed since the shooting turns started.
  *
- * El arranque y la detencion estan sincronizados sobre {@code this} para que
- * nunca queden dos hilos de cronometro corriendo a la vez, aunque
- * {@link #start()}/{@link #stop()} se invoquen desde distintos puntos del
- * ciclo de vida de la partida (nueva partida, partida cargada, fin de
- * partida).
+ * Starting and stopping are synchronized on {@code this} so that two clock
+ * threads are never left running at the same time, even if
+ * {@link #start()}/{@link #stop()} are called from different points in the
+ * game's lifecycle (new game, loaded game, game over).
  */
 public class GameClock {
 
@@ -25,7 +24,7 @@ public class GameClock {
         this.timerLabel = timerLabel;
     }
 
-    /** Arranca el cronometro desde cero. Si ya estaba corriendo, no hace nada. */
+    /** Starts the stopwatch from zero. Does nothing if it was already running. */
     public synchronized void start() {
         if (running) {
             return;
@@ -37,7 +36,7 @@ public class GameClock {
         thread.start();
     }
 
-    /** Detiene el cronometro (fin de partida o cierre de la vista). */
+    /** Stops the stopwatch (game over or view closed). */
     public synchronized void stop() {
         running = false;
         if (thread != null) {

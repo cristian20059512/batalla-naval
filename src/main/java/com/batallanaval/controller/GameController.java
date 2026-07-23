@@ -40,12 +40,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Orquesta la partida completa: fase de colocacion (HU-1), turnos de
- * disparo humano/maquina (HU-2/HU-4), verificacion del tablero enemigo
- * (HU-3) y deteccion de victoria. Es el "Controlador" de la arquitectura
- * MVC: conoce el Modelo (Board, Player) y la Vista (Board3DView), pero la
- * Vista y el Modelo no se conocen entre si directamente (salvo por el
- * Observer BoardListener, que ya desacopla esa relacion).
+ * Orchestrates the whole game: placement phase (HU-1), human/machine
+ * shooting turns (HU-2/HU-4), enemy board verification (HU-3), and victory
+ * detection. This is the "Controller" of the MVC architecture: it knows
+ * the Model (Board, Player) and the View (Board3DView), but the View and
+ * the Model do not know each other directly (except through the Observer
+ * BoardListener, which already decouples that relationship).
  */
 public class GameController {
 
@@ -105,10 +105,10 @@ public class GameController {
     }
 
     /**
-     * Coloca la flota de la maquina y crea el MachinePlayer desde que se
-     * entra al juego, no solo cuando el humano termina de colocar la suya:
-     * asi el tablero enemigo ya tiene barcos si se usa la brujula para
-     * verificarlo antes de empezar a disparar, en vez de verse vacio.
+     * Places the machine's fleet and creates the MachinePlayer as soon as
+     * the game is entered, not only once the human finishes placing theirs:
+     * this way the enemy board already has ships if the compass is used to
+     * verify it before shooting starts, instead of looking empty.
      */
     private void setUpMachine() {
         RandomFleetPlacer.placeRandomFleet(machineMainBoard);
@@ -117,10 +117,10 @@ public class GameController {
     }
 
     /**
-     * Reconstruye la partida a partir de los archivos de guardado (HU de
-     * persistencia): copia el estado de los tableros deserializados dentro
-     * de los tableros ya construidos (para no invalidar los listeners de
-     * la vista) y retoma fase/turno/cola de colocacion tal como quedaron.
+     * Rebuilds the game from the save files (persistence user story):
+     * copies the deserialized boards' state into the already-constructed
+     * boards (so the view's listeners aren't invalidated) and resumes
+     * phase/turn/placement queue exactly as they were left.
      */
     private void loadSavedGame() {
         try {
@@ -172,11 +172,10 @@ public class GameController {
     }
 
     /**
-     * Guardado automatico (HU de persistencia): guarda el estado completo
-     * de los tableros (archivo serializable) y un resumen legible con
-     * nickname y barcos hundidos (archivo plano) cada vez que la partida
-     * cambia de estado. Un fallo de E/S no debe interrumpir el juego, solo
-     * se registra en el log.
+     * Autosave (persistence user story): saves the boards' full state
+     * (serializable file) and a readable summary with nickname and sunk
+     * ships (plain text file) every time the game's state changes. An I/O
+     * failure must not interrupt the game, it is only logged.
      */
     private void autoSave() {
         GameState state = new GameState(humanPositionBoard, machineMainBoard, phase, turn,
@@ -206,10 +205,10 @@ public class GameController {
     }
 
     /**
-     * Invocado por el boton "Girar barco" (o la tecla R): rota la
-     * orientacion 90 grados en sentido horario cada vez (derecha, abajo,
-     * izquierda, arriba, y vuelve a derecha), para poder apuntar el barco
-     * hacia cualquiera de los 4 lados antes de colocarlo.
+     * Invoked by the "Rotate ship" button (or the R key): rotates the
+     * orientation 90 degrees clockwise each time (right, down, left, up,
+     * and back to right), so the ship can be pointed at any of the 4 sides
+     * before placing it.
      */
     public void toggleOrientation() {
         Orientation[] orientations = Orientation.values();
@@ -222,16 +221,16 @@ public class GameController {
     }
 
     /**
-     * Invocado por el boton brujula (modo de verificacion, HU-3). Devuelve
-     * el nuevo estado para que la vista pueda reflejarlo (p. ej. resaltando
-     * el boton mientras el modo esta activo).
+     * Invoked by the compass button (verification mode, HU-3). Returns the
+     * new state so the view can reflect it (e.g. highlighting the button
+     * while the mode is active).
      *
-     * NOTA: el enunciado (HU-3) pide que esta opcion sea "unicamente para
-     * fines de verificacion y no [este disponible] durante el juego
-     * normal". Por pedido explicito del usuario se dejo sin esa
-     * restriccion (canVerify() ya no revisa la fase): el boton se puede
-     * activar/desactivar en cualquier momento, aunque eso se aparte de la
-     * letra de esa historia de usuario.
+     * NOTE: the assignment (HU-3) asks for this option to be "for
+     * verification purposes only and not [available] during normal
+     * gameplay." Per the user's explicit request, that restriction was
+     * left out (canVerify() no longer checks the phase): the button can be
+     * turned on/off at any time, even though that departs from the letter
+     * of that user story.
      */
     public boolean toggleVerification() {
         if (!canVerify()) {
@@ -243,27 +242,27 @@ public class GameController {
         return verificationMode;
     }
 
-    /** Estado actual del modo de verificacion, para que la vista lo refleje al cargar una partida guardada. */
+    /** Current state of verification mode, so the view can reflect it when loading a saved game. */
     public boolean isVerificationMode() {
         return verificationMode;
     }
 
     /**
-     * Siempre disponible (ver nota en {@link #toggleVerification()}). Se
-     * deja el metodo (en vez de eliminarlo) para no desarmar el mecanismo
-     * de aviso a la vista (setOnVerificationAvailabilityChanged) por si se
-     * decide restaurar la restriccion mas adelante.
+     * Always available (see the note on {@link #toggleVerification()}).
+     * The method is kept (instead of removed) so the view-notification
+     * mechanism (setOnVerificationAvailabilityChanged) isn't dismantled, in
+     * case the restriction is restored later on.
      */
     private boolean canVerify() {
         return true;
     }
 
     /**
-     * Permite que la vista (MainController) se entere de cuando el boton de
-     * verificacion debe habilitarse o deshabilitarse, sin que el controlador
-     * de la vista tenga que conocer la fase interna de la partida. Se avisa
-     * de inmediato con el estado actual al registrarse (util al cargar una
-     * partida guardada que ya estaba en fase JUEGO).
+     * Lets the view (MainController) know when the verification button
+     * should be enabled or disabled, without the view controller having to
+     * know the game's internal phase. It reports the current state right
+     * away when registered (useful when loading a saved game that was
+     * already in the PLAYING phase).
      */
     public void setOnVerificationAvailabilityChanged(Consumer<Boolean> callback) {
         this.onVerificationAvailabilityChanged = callback != null ? callback : available -> { };
@@ -271,12 +270,12 @@ public class GameController {
     }
 
     /**
-     * Permite que la vista deshabilite "Girar barco" y "Colocar flota
-     * aleatoria" en cuanto termina la fase de colocacion (heuristica de
-     * usabilidad "prevencion de errores": sin esto, esos botones quedaban
-     * activos pero sin efecto durante la partida, un clic que no hace nada
-     * y no explica por que). Se avisa de inmediato con el estado actual al
-     * registrarse, igual que {@link #setOnVerificationAvailabilityChanged}.
+     * Lets the view disable "Rotate ship" and "Place random fleet" as soon
+     * as the placement phase ends (usability heuristic "error prevention":
+     * without this, those buttons stayed active but had no effect during
+     * the game, a click that does nothing and doesn't explain why). It
+     * reports the current state right away when registered, just like
+     * {@link #setOnVerificationAvailabilityChanged}.
      */
     public void setOnPlacementAvailabilityChanged(Consumer<Boolean> callback) {
         this.onPlacementAvailabilityChanged = callback != null ? callback : available -> { };
@@ -284,23 +283,24 @@ public class GameController {
     }
 
     /**
-     * Libera los recursos de esta partida (el hilo del cronometro) para que
-     * se pueda volver al menu principal sin dejar un hilo huerfano
-     * actualizando una vista que ya no esta en pantalla (heuristica de
-     * usabilidad "control y libertad del usuario": salir de la partida en
-     * curso sin tener que cerrar toda la aplicacion).
+     * Releases this game's resources (the clock thread) so it is possible
+     * to go back to the main menu without leaving an orphan thread updating
+     * a view that is no longer on screen (usability heuristic "user control
+     * and freedom": leaving the current game without having to close the
+     * whole application).
      */
     public void shutdown() {
         gameClock.stop();
     }
 
     /**
-     * Invocado por el boton "Colocar flota aleatoria": atajo para no
-     * colocar barco por barco. Solo coloca al azar los barcos que todavia
-     * faltan en la cola (los ya puestos a mano se quedan donde estan): si
-     * llamara a RandomFleetPlacer.placeRandomFleet directamente, este crea
-     * una flota nueva de 10 barcos y los agregaria encima de los que ya
-     * estaban colocados, dejando mas de 10 barcos en el tablero.
+     * Invoked by the "Place random fleet" button: a shortcut so ships don't
+     * have to be placed one by one. It only places at random the ships
+     * still missing from the queue (the ones already placed by hand stay
+     * where they are): if it called RandomFleetPlacer.placeRandomFleet
+     * directly, that creates a brand-new fleet of 10 ships and would add
+     * them on top of the ones already placed, leaving more than 10 ships
+     * on the board.
      */
     public void placeRandomFleet() {
         if (phase != GamePhase.PLACEMENT) {
@@ -338,11 +338,11 @@ public class GameController {
     }
 
     /**
-     * Previsualiza, mientras el mouse pasa sobre el tablero de posicion
-     * durante la fase de colocacion, que casillas ocuparia el barco actual
-     * de la cola si se colocara ahi (en verde si es una posicion valida, en
-     * rojo si queda fuera del tablero o se superpone con otro barco). Es
-     * solo una ayuda visual: no coloca nada hasta que el jugador hace clic.
+     * Previews, while the mouse moves over the placement board during the
+     * placement phase, which cells the current ship in the queue would
+     * occupy if placed there (green if it is a valid position, red if it
+     * falls outside the board or overlaps another ship). It is just a
+     * visual aid: nothing is placed until the player clicks.
      */
     private void onPositionBoardHover(Coordinate coordinate) {
         if (phase != GamePhase.PLACEMENT || placementQueue.isEmpty()) {
@@ -403,9 +403,9 @@ public class GameController {
     }
 
     /**
-     * Recorre las 100 casillas del tablero y agrupa (sin duplicados) los
-     * barcos que ya estan colocados en el, para armar el Fleet que le hace
-     * falta al tablero cuando la colocacion fue manual, casilla por casilla.
+     * Walks the board's 100 cells and groups (without duplicates) the
+     * ships already placed on it, to build the Fleet the board is missing
+     * when placement was done manually, cell by cell.
      */
     private Fleet collectPlacedFleet(Board board) {
         Set<Ship> ships = new LinkedHashSet<>();
@@ -466,12 +466,12 @@ public class GameController {
     }
 
     /**
-     * Pequena pausa entre disparos de la maquina para que se alcancen a ver
-     * en la UI. Corre en un hilo aparte (en vez de un PauseTransition, que
-     * se ejecuta dentro del propio hilo de JavaFX) para que el "turno de la
-     * maquina" sea concurrencia real; la accion que retoma el juego se
-     * reenvia al hilo de JavaFX con {@link Platform#runLater}, ya que es el
-     * unico autorizado a tocar el Board/las vistas.
+     * Small pause between the machine's shots so they can be seen in the
+     * UI. Runs on a separate thread (instead of a PauseTransition, which
+     * runs inside the JavaFX thread itself) so the "machine's turn" is real
+     * concurrency; the action that resumes the game is sent back to the
+     * JavaFX thread with {@link Platform#runLater}, since it is the only
+     * one allowed to touch the Board/the views.
      */
     private void pauseThen(Runnable action) {
         Thread turnThread = new Thread(() -> {

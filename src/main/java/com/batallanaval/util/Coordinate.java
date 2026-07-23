@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * Representa una posicion (fila, columna) dentro del tablero 10x10.
- * Es inmutable y sirve como clave en colecciones (equals/hashCode definidos).
+ * Represents a (row, column) position within the 10x10 board.
+ * It is immutable and works as a key in collections (equals/hashCode defined).
  */
 public final class Coordinate implements Serializable {
 
@@ -28,9 +28,9 @@ public final class Coordinate implements Serializable {
     }
 
     /**
-     * Devuelve la coordenada a "steps" casillas de distancia en la
-     * direccion indicada, util para recorrer un barco casilla por casilla
-     * sin importar hacia donde apunte (arriba, abajo, izquierda o derecha).
+     * Returns the coordinate "steps" cells away in the given direction,
+     * useful for walking a ship cell by cell regardless of which way it
+     * points (up, down, left, or right).
      */
     public Coordinate shift(Orientation orientation, int steps) {
         switch (orientation) {

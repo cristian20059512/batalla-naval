@@ -10,10 +10,10 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Fotografia serializable de todo lo necesario para reanudar la partida:
- * los dos tableros completos (con flotas, celdas e impactos ya aplicados) y
- * el estado de turno/fase/colocacion del {@code GameController}. Es lo que
- * el adaptador de serializacion guarda en el archivo binario.
+ * Serializable snapshot of everything needed to resume the game: the two
+ * full boards (with fleets, cells, and hits already applied) and the
+ * turn/phase/placement state of {@code GameController}. This is what the
+ * serialization adapter saves to the binary file.
  */
 public class GameState implements Serializable {
 

@@ -4,9 +4,9 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Representa la flota completa de un jugador (10 barcos). No conoce nada
- * del tablero; solo agrupa los barcos y responde preguntas de estado
- * agregado, como cuantos siguen a flote.
+ * Represents a player's whole fleet (10 ships). It knows nothing about the
+ * board; it only groups the ships and answers aggregate status questions,
+ * such as how many are still afloat.
  */
 public class Fleet implements Serializable {
 
