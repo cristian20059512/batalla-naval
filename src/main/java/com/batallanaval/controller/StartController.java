@@ -3,6 +3,7 @@ package com.batallanaval.controller;
 import com.batallanaval.exception.PersistenceException;
 import com.batallanaval.persistence.GamePersistenceManager;
 import com.batallanaval.util.GameSession;
+import com.batallanaval.util.SoundManager;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -39,9 +40,33 @@ public class StartController {
 
     private final GamePersistenceManager persistenceManager = new GamePersistenceManager();
 
+    /** Nickname con el que se guardo la ultima partida, o null si no hay ninguna (o no se pudo leer). */
+    private String savedNickname;
+
     @FXML
     public void initialize() {
-        continueButton.setDisable(!persistenceManager.hasSavedGame());
+        if (persistenceManager.hasSavedGame()) {
+            try {
+                savedNickname = persistenceManager.loadSummary().getHumanNickname();
+            } catch (PersistenceException e) {
+                LOG.log(Level.WARNING, "No se pudo leer el resumen de la partida guardada.", e);
+                savedNickname = null;
+            }
+        }
+        updateContinueAvailability();
+        nicknameField.textProperty().addListener((observable, oldValue, newValue) -> updateContinueAvailability());
+    }
+
+    /**
+     * "Continuar" solo se habilita si el nombre escrito coincide con el
+     * nickname de la partida guardada (para no cargar por error/trampa la
+     * partida de otra persona que haya jugado antes en el mismo equipo).
+     */
+    private void updateContinueAvailability() {
+        boolean matches = savedNickname != null
+                && nicknameField.getText() != null
+                && nicknameField.getText().trim().equalsIgnoreCase(savedNickname.trim());
+        continueButton.setDisable(!matches);
     }
 
     @FXML
@@ -57,6 +82,16 @@ public class StartController {
 
     @FXML
     private void onContinue() {
+        // el boton ya deberia estar deshabilitado si no coincide, pero se
+        // revalida aqui por si se invocara de otra forma (defensa en
+        // profundidad, igual que canVerify() en GameController).
+        if (savedNickname == null || nicknameField.getText() == null
+                || !nicknameField.getText().trim().equalsIgnoreCase(savedNickname.trim())) {
+            messageLabel.setTextFill(Color.web("#F0997B"));
+            messageLabel.setText("Escribe el mismo nombre con el que guardaste la partida para continuar.");
+            return;
+        }
+        GameSession.setHumanNickname(nicknameField.getText());
         goToGame();
     }
 
@@ -87,7 +122,12 @@ public class StartController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/batallanaval/view/main-view.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) nicknameField.getScene().getWindow();
-            stage.setScene(new Scene(root, 900, 650));
+            // 1320x880: los dos tableros son SubScene 3D de 600x520 cada
+            // uno; con el espaciado y el padding del HBox, un tamano menor
+            // los recorta.
+            Scene scene = new Scene(root, 1320, 880);
+            SoundManager.attachButtonSounds(scene);
+            stage.setScene(scene);
             stage.setResizable(true);
         } catch (IOException e) {
             LOG.log(Level.SEVERE, "No se pudo cargar el tablero de juego.", e);

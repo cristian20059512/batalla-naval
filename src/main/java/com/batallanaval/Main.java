@@ -1,5 +1,7 @@
 package com.batallanaval;
 
+import com.batallanaval.util.SoundManager;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -21,6 +23,9 @@ public class Main extends Application {
         Parent root = loader.load();
 
         Scene scene = new Scene(root, 1280, 690);
+        SoundManager.attachButtonSounds(scene);
+        SoundManager.playBackgroundMusic();
+
         stage.setTitle("Batalla Naval");
         stage.setScene(scene);
         stage.setResizable(false);

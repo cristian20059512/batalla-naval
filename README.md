@@ -32,8 +32,9 @@ mvn test
 
 - `model`: entidades del dominio (`Board`, `Ship` y sus tipos, `Fleet`,
   `Player`, `Cell`, etc.)
-- `view`: representación visual del tablero con figuras 2D de JavaFX
-  (`BoardView`)
+- `view`: representación visual 3D del tablero (`Board3DView`: Box/Cylinder/
+  Sphere, cámara en perspectiva y luces). La versión anterior en figuras 2D
+  (`BoardView`) se conserva sin usar en el mismo paquete.
 - `controller`: controladores FXML y el orquestador de la partida
   (`GameController`)
 - `persistence`: guardado/carga de la partida (archivos serializables y

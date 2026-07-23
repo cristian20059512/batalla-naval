@@ -1,6 +1,7 @@
 module com.batallanaval {
     requires javafx.controls;
     requires javafx.fxml;
+    requires javafx.media;
     requires java.logging;
 
     // necesario para que el FXMLLoader pueda inyectar el controlador por reflexion

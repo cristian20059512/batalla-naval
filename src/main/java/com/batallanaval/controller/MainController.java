@@ -1,5 +1,7 @@
 package com.batallanaval.controller;
 
+import com.batallanaval.util.SoundManager;
+
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -48,6 +50,9 @@ public class MainController {
     @FXML
     private Button randomFleetButton;
 
+    @FXML
+    private Button backButton;
+
     private GameController gameController;
 
     @FXML
@@ -81,17 +86,19 @@ public class MainController {
     /**
      * Atajos de teclado: R gira el barco actual, ESPACIO coloca la flota
      * aleatoria, V alterna la verificacion del tablero enemigo y ESCAPE
-     * vuelve al menu principal (los mismos botones/acciones ya existentes,
-     * solo que accesibles sin mouse). placeRandomFleet() y
-     * toggleVerification() ya validan internamente si la accion aplica a
-     * la fase actual, asi que es seguro invocarlos en cualquier momento.
+     * vuelve al menu principal. En vez de llamar directo al metodo del
+     * controlador, se dispara el boton (Button.fire()) correspondiente: asi
+     * el atajo se comporta identico al clic con mouse en todo sentido,
+     * incluyendo el sonido (SoundManager engancha el sonido de clic al
+     * ActionEvent del boton, no a la tecla) y el respeto al estado
+     * deshabilitado (fire() no hace nada si el boton esta deshabilitado).
      */
     private void onKeyPressed(KeyEvent event) {
         switch (event.getCode()) {
-            case R -> gameController.toggleOrientation();
-            case SPACE -> gameController.placeRandomFleet();
-            case V -> onToggleVerification();
-            case ESCAPE -> onBackToMenu();
+            case R -> rotateButton.fire();
+            case SPACE -> randomFleetButton.fire();
+            case V -> compassButton.fire();
+            case ESCAPE -> backButton.fire();
             default -> { }
         }
     }
@@ -129,7 +136,9 @@ public class MainController {
             // el que Main.java la carga la primera vez (1280x690); si se
             // reabre con el tamano de la pantalla de juego (900x650) los
             // botones anclados quedan sin espacio y se ven rotos/incompletos.
-            stage.setScene(new Scene(root, 1280, 690));
+            Scene scene = new Scene(root, 1280, 690);
+            SoundManager.attachButtonSounds(scene);
+            stage.setScene(scene);
             stage.setResizable(false);
         } catch (IOException e) {
             LOG.log(Level.SEVERE, "No se pudo volver al menu principal.", e);

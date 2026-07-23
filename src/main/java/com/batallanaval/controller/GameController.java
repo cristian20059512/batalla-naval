@@ -23,7 +23,7 @@ import com.batallanaval.util.ShotResult;
 import com.batallanaval.util.GameSession;
 import com.batallanaval.util.ShipType;
 import com.batallanaval.util.GameTurn;
-import com.batallanaval.view.BoardView;
+import com.batallanaval.view.Board3DView;
 
 import javafx.application.Platform;
 import javafx.scene.control.Label;
@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  * Orquesta la partida completa: fase de colocacion (HU-1), turnos de
  * disparo humano/maquina (HU-2/HU-4), verificacion del tablero enemigo
  * (HU-3) y deteccion de victoria. Es el "Controlador" de la arquitectura
- * MVC: conoce el Modelo (Board, Player) y la Vista (BoardView), pero la
+ * MVC: conoce el Modelo (Board, Player) y la Vista (Board3DView), pero la
  * Vista y el Modelo no se conocen entre si directamente (salvo por el
  * Observer BoardListener, que ya desacopla esa relacion).
  */
@@ -54,8 +54,8 @@ public class GameController {
     private final Board humanPositionBoard = new Board();
     private final Board machineMainBoard = new Board();
 
-    private final BoardView positionView;
-    private final BoardView mainView;
+    private final Board3DView positionView;
+    private final Board3DView mainView;
     private final Label statusLabel;
     private final GameClock gameClock;
 
@@ -81,8 +81,8 @@ public class GameController {
         this.statusLabel = statusLabel;
         this.gameClock = new GameClock(timerLabel);
 
-        positionView = new BoardView(humanPositionBoard, true);
-        mainView = new BoardView(machineMainBoard, false);
+        positionView = new Board3DView(humanPositionBoard, true);
+        mainView = new Board3DView(machineMainBoard, false);
 
         positionContainer.getChildren().add(positionView.getNode());
         mainContainer.getChildren().add(mainView.getNode());
