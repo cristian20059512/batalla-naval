@@ -1,45 +1,45 @@
 package com.batallanaval.persistence;
 
-import com.batallanaval.exception.PersistenciaException;
+import com.batallanaval.exception.PersistenceException;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Punto unico de acceso a la persistencia de la partida. Coordina los dos
- * adaptadores (tablero serializado + resumen en texto plano) para que
- * {@code GameController} guarde/cargue la partida completa con una sola
- * llamada, sin conocer que son dos archivos con dos mecanismos de E/S
- * distintos detras (eso es responsabilidad de cada {@link PersistenceAdapter}).
+ * Single access point for game persistence. Coordinates the two adapters
+ * (serialized board + plain text summary) so {@code GameController} can
+ * save/load the whole game with a single call, without knowing that there
+ * are two files with two different I/O mechanisms behind them (that is
+ * each {@link PersistenceAdapter}'s responsibility).
  */
 public class GamePersistenceManager {
 
-    private static final Path CARPETA_GUARDADO = Paths.get("saves");
+    private static final Path SAVE_FOLDER = Paths.get("saves");
 
-    private final PersistenceAdapter<EstadoPartida> adaptadorTablero =
-            new SerializacionEstadoAdapter(CARPETA_GUARDADO.resolve("partida.dat"));
-    private final PersistenceAdapter<ResumenPartida> adaptadorResumen =
-            new ArchivoPlanoResumenAdapter(CARPETA_GUARDADO.resolve("resumen.txt"));
+    private final PersistenceAdapter<GameState> stateAdapter =
+            new SerializedStateAdapter(SAVE_FOLDER.resolve("partida.dat"));
+    private final PersistenceAdapter<GameSummary> summaryAdapter =
+            new PlainTextSummaryAdapter(SAVE_FOLDER.resolve("resumen.txt"));
 
-    public void guardarPartida(EstadoPartida estado, ResumenPartida resumen) throws PersistenciaException {
-        adaptadorTablero.guardar(estado);
-        adaptadorResumen.guardar(resumen);
+    public void saveGame(GameState state, GameSummary summary) throws PersistenceException {
+        stateAdapter.save(state);
+        summaryAdapter.save(summary);
     }
 
-    public boolean existePartidaGuardada() {
-        return adaptadorTablero.existeGuardado() && adaptadorResumen.existeGuardado();
+    public boolean hasSavedGame() {
+        return stateAdapter.hasSavedData() && summaryAdapter.hasSavedData();
     }
 
-    public EstadoPartida cargarEstado() throws PersistenciaException {
-        return adaptadorTablero.cargar();
+    public GameState loadState() throws PersistenceException {
+        return stateAdapter.load();
     }
 
-    public ResumenPartida cargarResumen() throws PersistenciaException {
-        return adaptadorResumen.cargar();
+    public GameSummary loadSummary() throws PersistenceException {
+        return summaryAdapter.load();
     }
 
-    public void eliminarPartidaGuardada() throws PersistenciaException {
-        adaptadorTablero.eliminarGuardado();
-        adaptadorResumen.eliminarGuardado();
+    public void deleteSavedGame() throws PersistenceException {
+        stateAdapter.deleteSavedData();
+        summaryAdapter.deleteSavedData();
     }
 }

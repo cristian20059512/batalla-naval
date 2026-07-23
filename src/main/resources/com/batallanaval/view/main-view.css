@@ -1,0 +1,85 @@
+.title-text {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Times New Roman";
+    -fx-text-fill: #F5DFA3;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.85), 4, 0.4, 1, 1);
+}
+
+.subtle-text {
+    -fx-text-fill: #F5E6C8;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.85), 4, 0.4, 1, 1);
+}
+
+.wood-button {
+    -fx-background-color: transparent;
+    -fx-background-image: url("images/plank-button.png");
+    -fx-background-size: 100% 100%;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-text-fill: #F5E6C8;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-padding: 10 18 10 18;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 2, 0.5, 1, 1);
+}
+
+.wood-button:hover {
+    -fx-text-fill: #FFF3D6;
+}
+
+.wood-button:pressed {
+    -fx-text-fill: #D9BE84;
+}
+
+.compass-button {
+    -fx-background-color: radial-gradient(center 50% 40%, radius 75%, #E8D4A0, #B8873F 55%, #6B4423 85%, #3A2412);
+    -fx-background-radius: 1000;
+    -fx-border-radius: 1000;
+    -fx-border-color: #2A1806;
+    -fx-border-width: 3;
+    -fx-text-fill: #2A1806;
+    -fx-font-size: 28px;
+    -fx-alignment: center;
+    -fx-padding: 0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.7), 8, 0.4, 2, 3);
+    -fx-cursor: hand;
+}
+
+.compass-button:hover {
+    -fx-effect: dropshadow(gaussian, rgba(255,235,180,0.7), 12, 0.4, 0, 0);
+}
+
+.compass-button:pressed {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.7), 4, 0.4, 1, 1);
+}
+
+.compass-button:verifying {
+    -fx-border-color: #F5DFA3;
+    -fx-border-width: 4;
+    -fx-effect: dropshadow(gaussian, rgba(245,223,163,0.95), 16, 0.5, 0, 0);
+}
+
+.compass-button:disabled {
+    -fx-opacity: 0.35;
+    -fx-cursor: default;
+}
+
+.key-hint {
+    -fx-text-fill: #2A1806;
+    -fx-background-color: #F5DFA3;
+    -fx-background-radius: 4;
+    -fx-padding: 1 6 1 6;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 2, 0.4, 1, 1);
+}
+
+.board-frame {
+    -fx-background-color: rgba(12,25,40,0.55);
+    -fx-background-radius: 8;
+    -fx-border-color: #6B4423;
+    -fx-border-width: 3;
+    -fx-border-radius: 8;
+    -fx-padding: 8;
+}

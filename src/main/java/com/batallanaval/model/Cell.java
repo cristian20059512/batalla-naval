@@ -1,53 +1,53 @@
 package com.batallanaval.model;
 
-import com.batallanaval.util.Coordenada;
-import com.batallanaval.util.EstadoCelda;
+import com.batallanaval.util.Coordinate;
+import com.batallanaval.util.CellState;
 
 import java.io.Serializable;
 
 /**
- * Una casilla del tablero. Guarda su posicion, su estado visible actual y
- * una referencia opcional al barco que ocupa (null si esta vacia o es agua).
+ * A board cell. Holds its position, its current visible state, and an
+ * optional reference to the ship occupying it (null if empty or water).
  */
 public class Cell implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final Coordenada coordenada;
-    private EstadoCelda estado;
-    private Ship barco;
+    private final Coordinate coordinate;
+    private CellState state;
+    private Ship ship;
 
-    public Cell(Coordenada coordenada) {
-        this.coordenada = coordenada;
-        this.estado = EstadoCelda.VACIA;
-        this.barco = null;
+    public Cell(Coordinate coordinate) {
+        this.coordinate = coordinate;
+        this.state = CellState.EMPTY;
+        this.ship = null;
     }
 
-    public Coordenada getCoordenada() {
-        return coordenada;
+    public Coordinate getCoordinate() {
+        return coordinate;
     }
 
-    public EstadoCelda getEstado() {
-        return estado;
+    public CellState getState() {
+        return state;
     }
 
-    public void setEstado(EstadoCelda estado) {
-        this.estado = estado;
+    public void setState(CellState state) {
+        this.state = state;
     }
 
-    public Ship getBarco() {
-        return barco;
+    public Ship getShip() {
+        return ship;
     }
 
-    public void setBarco(Ship barco) {
-        this.barco = barco;
+    public void setShip(Ship ship) {
+        this.ship = ship;
     }
 
-    public boolean tieneBarco() {
-        return barco != null;
+    public boolean hasShip() {
+        return ship != null;
     }
 
-    public boolean yaFueDisparada() {
-        return estado == EstadoCelda.AGUA || estado == EstadoCelda.TOCADO || estado == EstadoCelda.HUNDIDO;
+    public boolean wasAlreadyShot() {
+        return state == CellState.WATER || state == CellState.HIT || state == CellState.SUNK;
     }
 }

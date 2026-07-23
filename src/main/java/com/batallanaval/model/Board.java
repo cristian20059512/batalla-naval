@@ -1,183 +1,182 @@
 package com.batallanaval.model;
 
-import com.batallanaval.exception.ColocacionInvalidaException;
-import com.batallanaval.exception.DisparoInvalidoException;
-import com.batallanaval.util.Coordenada;
-import com.batallanaval.util.EstadoCelda;
-import com.batallanaval.util.Orientacion;
-import com.batallanaval.util.ResultadoDisparo;
+import com.batallanaval.exception.InvalidPlacementException;
+import com.batallanaval.exception.InvalidShotException;
+import com.batallanaval.util.Coordinate;
+import com.batallanaval.util.CellState;
+import com.batallanaval.util.Orientation;
+import com.batallanaval.util.ShotResult;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Tablero de 10x10 casillas. Contiene la logica de negocio de colocacion de
- * barcos (HU-1) y de disparos (HU-2/HU-4): validaciones, deteccion de
- * agua/tocado/hundido, y notificacion a la vista via el patron Observer
- * (ver {@link BoardListener}).
+ * A 10x10 board. Holds the business logic for placing ships (HU-1) and for
+ * shooting (HU-2/HU-4): validations, water/hit/sunk detection, and
+ * notifying the view via the Observer pattern (see {@link BoardListener}).
  *
- * La misma clase sirve tanto para el tablero de posicion del jugador humano
- * como para el tablero principal (propio de la maquina o del humano segun
- * quien dispare), ya que ambos son, en esencia, un grid 10x10 con una flota.
+ * The same class serves both the human player's placement board and the
+ * main board (the machine's or the human's, depending on who is firing),
+ * since both are, in essence, a 10x10 grid with a fleet on it.
  */
 public class Board implements Serializable {
 
-    public static final int TAMANIO = 10;
+    public static final int SIZE = 10;
 
     private static final long serialVersionUID = 1L;
 
-    private final Cell[][] celdas;
-    private Fleet flota;
+    private final Cell[][] cells;
+    private Fleet fleet;
 
     // transient: los listeners (controladores JavaFX) no se serializan;
     // se vuelven a registrar al recargar una partida guardada.
     private final transient List<BoardListener> listeners = new ArrayList<>();
 
     public Board() {
-        celdas = new Cell[TAMANIO][TAMANIO];
-        for (int fila = 0; fila < TAMANIO; fila++) {
-            for (int columna = 0; columna < TAMANIO; columna++) {
-                celdas[fila][columna] = new Cell(new Coordenada(fila, columna));
+        cells = new Cell[SIZE][SIZE];
+        for (int row = 0; row < SIZE; row++) {
+            for (int column = 0; column < SIZE; column++) {
+                cells[row][column] = new Cell(new Coordinate(row, column));
             }
         }
     }
 
-    public void setFlota(Fleet flota) {
-        this.flota = flota;
+    public void setFleet(Fleet fleet) {
+        this.fleet = fleet;
     }
 
-    public Fleet getFlota() {
-        return flota;
+    public Fleet getFleet() {
+        return fleet;
     }
 
-    public Cell getCelda(Coordenada coordenada) {
-        return celdas[coordenada.getFila()][coordenada.getColumna()];
+    public Cell getCell(Coordinate coordinate) {
+        return cells[coordinate.getRow()][coordinate.getColumn()];
     }
 
-    public void agregarListener(BoardListener listener) {
+    public void addListener(BoardListener listener) {
         listeners.add(listener);
     }
 
-    public void removerListener(BoardListener listener) {
+    public void removeListener(BoardListener listener) {
         listeners.remove(listener);
     }
 
-    private void notificar(Coordenada coordenada, EstadoCelda estado) {
+    private void notifyListeners(Coordinate coordinate, CellState state) {
         for (BoardListener listener : listeners) {
-            listener.onCambioCelda(coordenada, estado);
+            listener.onCellChanged(coordinate, state);
         }
     }
 
     /**
-     * Coloca un barco en el tablero validando las reglas de HU-1: dentro
-     * del tablero y sin superposicion con otro barco ya colocado.
-     * Una vez colocado, el barco no puede volver a colocarse (no se provee
-     * metodo de "mover"), cumpliendo la definicion de hecho de HU-1.
+     * Places a ship on the board, validating HU-1's rules: within the board
+     * and without overlapping another ship already placed.
+     * Once placed, a ship cannot be placed again (no "move" method is
+     * provided), meeting HU-1's definition of done.
      */
-    public void colocarBarco(Ship barco, Coordenada inicio, Orientacion orientacion)
-            throws ColocacionInvalidaException {
+    public void placeShip(Ship ship, Coordinate start, Orientation orientation)
+            throws InvalidPlacementException {
 
-        List<Coordenada> posiciones = calcularPosiciones(barco, inicio, orientacion);
+        List<Coordinate> positions = calculatePositions(ship, start, orientation);
 
-        for (Coordenada coordenada : posiciones) {
-            if (!coordenada.dentroDelTablero(TAMANIO)) {
-                throw new ColocacionInvalidaException(
-                        "El barco " + barco.getNombre() + " queda fuera del tablero en " + coordenada);
+        for (Coordinate coordinate : positions) {
+            if (!coordinate.isWithinBoard(SIZE)) {
+                throw new InvalidPlacementException(
+                        "El barco " + ship.getName() + " queda fuera del tablero en " + coordinate);
             }
-            if (getCelda(coordenada).tieneBarco()) {
-                throw new ColocacionInvalidaException(
-                        "El barco " + barco.getNombre() + " se superpone con otro barco en " + coordenada);
+            if (getCell(coordinate).hasShip()) {
+                throw new InvalidPlacementException(
+                        "El barco " + ship.getName() + " se superpone con otro barco en " + coordinate);
             }
         }
 
-        barco.colocar(inicio, orientacion);
-        for (Coordenada coordenada : posiciones) {
-            Cell celda = getCelda(coordenada);
-            celda.setBarco(barco);
-            celda.setEstado(EstadoCelda.BARCO);
+        ship.place(start, orientation);
+        for (Coordinate coordinate : positions) {
+            Cell cell = getCell(coordinate);
+            cell.setShip(ship);
+            cell.setState(CellState.SHIP);
+            notifyListeners(coordinate, CellState.SHIP);
         }
     }
 
-    private List<Coordenada> calcularPosiciones(Ship barco, Coordenada inicio, Orientacion orientacion) {
-        List<Coordenada> posiciones = new ArrayList<>(barco.getTamanio());
-        for (int i = 0; i < barco.getTamanio(); i++) {
-            posiciones.add(inicio.desplazar(orientacion, i));
+    private List<Coordinate> calculatePositions(Ship ship, Coordinate start, Orientation orientation) {
+        List<Coordinate> positions = new ArrayList<>(ship.getSize());
+        for (int i = 0; i < ship.getSize(); i++) {
+            positions.add(start.shift(orientation, i));
         }
-        return posiciones;
+        return positions;
     }
 
     /**
-     * Procesa un disparo sobre la coordenada indicada (HU-2/HU-4).
-     * Devuelve el resultado (AGUA, TOCADO o HUNDIDO) y notifica a los
-     * listeners registrados para que la vista se actualice en tiempo real.
+     * Processes a shot at the given coordinate (HU-2/HU-4).
+     * Returns the result (WATER, HIT, or SUNK) and notifies the registered
+     * listeners so the view updates in real time.
      */
-    public ResultadoDisparo disparar(Coordenada coordenada) {
-        if (!coordenada.dentroDelTablero(TAMANIO)) {
-            throw new DisparoInvalidoException("La coordenada " + coordenada + " esta fuera del tablero.");
+    public ShotResult shoot(Coordinate coordinate) {
+        if (!coordinate.isWithinBoard(SIZE)) {
+            throw new InvalidShotException("La coordenada " + coordinate + " esta fuera del tablero.");
         }
 
-        Cell celda = getCelda(coordenada);
-        if (celda.yaFueDisparada()) {
-            throw new DisparoInvalidoException("Ya se disparo antes en " + coordenada + ".");
+        Cell cell = getCell(coordinate);
+        if (cell.wasAlreadyShot()) {
+            throw new InvalidShotException("Ya se disparo antes en " + coordinate + ".");
         }
 
-        ResultadoDisparo resultado;
-        if (!celda.tieneBarco()) {
-            celda.setEstado(EstadoCelda.AGUA);
-            resultado = ResultadoDisparo.AGUA;
+        ShotResult result;
+        if (!cell.hasShip()) {
+            cell.setState(CellState.WATER);
+            result = ShotResult.WATER;
         } else {
-            Ship barco = celda.getBarco();
-            barco.recibirImpacto(coordenada);
-            if (barco.estaHundido()) {
-                celda.setEstado(EstadoCelda.HUNDIDO);
-                resultado = ResultadoDisparo.HUNDIDO;
-                marcarBarcoHundido(barco);
+            Ship ship = cell.getShip();
+            ship.receiveHit(coordinate);
+            if (ship.isSunk()) {
+                cell.setState(CellState.SUNK);
+                result = ShotResult.SUNK;
+                markShipSunk(ship);
             } else {
-                celda.setEstado(EstadoCelda.TOCADO);
-                resultado = ResultadoDisparo.TOCADO;
+                cell.setState(CellState.HIT);
+                result = ShotResult.HIT;
             }
         }
 
-        notificar(coordenada, celda.getEstado());
-        return resultado;
+        notifyListeners(coordinate, cell.getState());
+        return result;
     }
 
     /**
-     * Cuando un barco se hunde, todas sus casillas (incluidas las que ya
-     * estaban en TOCADO) pasan a mostrarse como HUNDIDO, tal como pide el
-     * enunciado ("aparecera en el tablero el barco completo con la marca
-     * indicativa de que ha sido hundido").
+     * When a ship sinks, all of its cells (including the ones already
+     * marked HIT) switch to showing SUNK, as the assignment requires ("the
+     * whole ship will appear on the board marked as sunk").
      */
-    private void marcarBarcoHundido(Ship barco) {
-        for (Coordenada coordenada : barco.getPosiciones()) {
-            Cell celda = getCelda(coordenada);
-            celda.setEstado(EstadoCelda.HUNDIDO);
-            notificar(coordenada, EstadoCelda.HUNDIDO);
+    private void markShipSunk(Ship ship) {
+        for (Coordinate coordinate : ship.getPositions()) {
+            Cell cell = getCell(coordinate);
+            cell.setState(CellState.SUNK);
+            notifyListeners(coordinate, CellState.SUNK);
         }
     }
 
-    public boolean todaLaFlotaHundida() {
-        return flota != null && flota.estaCompletamenteHundida();
+    public boolean isFleetFullySunk() {
+        return fleet != null && fleet.isCompletelySunk();
     }
 
     /**
-     * Copia el estado (celdas y flota) de un tablero recien deserializado
-     * dentro de este tablero ya construido, en vez de reemplazar la
-     * instancia. Asi los listeners ya registrados (la vista JavaFX) y la
-     * referencia final a este {@code Board} siguen siendo validos despues
-     * de cargar una partida guardada.
+     * Copies the state (cells and fleet) of a freshly deserialized board
+     * into this already-constructed board, instead of replacing the
+     * instance. This way, the listeners already registered (the JavaFX
+     * view) and the final reference to this {@code Board} remain valid
+     * after loading a saved game.
      */
-    public void restaurarEstado(Board origen) {
-        for (int fila = 0; fila < TAMANIO; fila++) {
-            for (int columna = 0; columna < TAMANIO; columna++) {
-                Coordenada coordenada = new Coordenada(fila, columna);
-                Cell celdaOrigen = origen.getCelda(coordenada);
-                Cell celdaDestino = getCelda(coordenada);
-                celdaDestino.setBarco(celdaOrigen.getBarco());
-                celdaDestino.setEstado(celdaOrigen.getEstado());
+    public void restoreState(Board source) {
+        for (int row = 0; row < SIZE; row++) {
+            for (int column = 0; column < SIZE; column++) {
+                Coordinate coordinate = new Coordinate(row, column);
+                Cell sourceCell = source.getCell(coordinate);
+                Cell targetCell = getCell(coordinate);
+                targetCell.setShip(sourceCell.getShip());
+                targetCell.setState(sourceCell.getState());
             }
         }
-        this.flota = origen.getFlota();
+        this.fleet = source.getFleet();
     }
 }

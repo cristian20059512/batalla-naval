@@ -1,42 +1,101 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Tooltip?>
 
-<BorderPane fx:controller="com.batallanaval.controller.MainController"
-            xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml">
-    <top>
-        <VBox alignment="CENTER" spacing="8.0">
-            <padding>
-                <Insets top="16.0" right="16.0" bottom="8.0" left="16.0" />
-            </padding>
-            <Label text="Batalla Naval" style="-fx-font-size: 24px; -fx-font-weight: bold;" />
-            <Label fx:id="statusLabel" text="Coloca tu flota" />
-            <HBox alignment="CENTER" spacing="10.0">
-                <Button text="Girar barco" onAction="#onGirarBarco" />
-                <Button text="Colocar flota aleatoria" onAction="#onColocarAleatorio" />
-                <Button text="Ver tablero enemigo" onAction="#onVerTableroEnemigo" />
+<AnchorPane fx:id="rootPane" stylesheets="@main-view.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.batallanaval.controller.MainController">
+    <ImageView fitHeight="${rootPane.height}" fitWidth="${rootPane.width}" preserveRatio="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <image>
+            <Image url="@images/fondo-juego.png" />
+        </image>
+    </ImageView>
+
+    <BorderPane style="-fx-background-color: transparent;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <top>
+            <VBox alignment="CENTER" spacing="8.0">
+                <padding>
+                    <Insets bottom="8.0" left="16.0" right="16.0" top="16.0" />
+                </padding>
+                <Label styleClass="title-text" text="Batalla Naval" />
+                <Label fx:id="statusLabel" styleClass="subtle-text" text="Coloca tu flota" />
+                <Label fx:id="timerLabel" styleClass="subtle-text" text="Tiempo: 00:00" />
+                <HBox alignment="CENTER" spacing="10.0">
+                    <Button fx:id="rotateButton" onAction="#onRotateShip" styleClass="wood-button" text="Girar barco (R)">
+                        <cursor>
+                            <Cursor fx:constant="HAND" />
+                        </cursor>
+                        <tooltip>
+                            <Tooltip text="Cambia la orientacion del proximo barco: derecha, abajo, izquierda, arriba" />
+                        </tooltip>
+                    </Button>
+                    <Button fx:id="randomFleetButton" onAction="#onPlaceRandomFleet" styleClass="wood-button" text="Colocar flota aleatoria (ESPACIO)">
+                        <cursor>
+                            <Cursor fx:constant="HAND" />
+                        </cursor>
+                        <tooltip>
+                            <Tooltip text="Coloca automaticamente todos los barcos que falten" />
+                        </tooltip>
+                    </Button>
+                </HBox>
+            </VBox>
+        </top>
+        <center>
+            <HBox alignment="CENTER" spacing="30.0">
+                <padding>
+                    <Insets bottom="20.0" left="20.0" right="20.0" top="10.0" />
+                </padding>
+                <VBox alignment="CENTER" spacing="6.0">
+                    <Label styleClass="subtle-text" text="Tu tablero (posicion)" />
+                    <StackPane styleClass="board-frame">
+                        <Pane fx:id="positionBoardContainer" />
+                    </StackPane>
+                </VBox>
+                <VBox alignment="CENTER" spacing="6.0">
+                    <Label styleClass="subtle-text" text="Tablero enemigo (principal)" />
+                    <StackPane styleClass="board-frame">
+                        <Pane fx:id="mainBoardContainer" />
+                    </StackPane>
+                </VBox>
             </HBox>
-        </VBox>
-    </top>
-    <center>
-        <HBox alignment="CENTER" spacing="30.0">
-            <padding>
-                <Insets top="10.0" right="20.0" bottom="20.0" left="20.0" />
-            </padding>
-            <VBox alignment="CENTER" spacing="6.0">
-                <Label text="Tu tablero (posicion)" />
-                <Pane fx:id="positionBoardContainer" />
-            </VBox>
-            <VBox alignment="CENTER" spacing="6.0">
-                <Label text="Tablero enemigo (principal)" />
-                <Pane fx:id="mainBoardContainer" />
-            </VBox>
-        </HBox>
-    </center>
-</BorderPane>
+        </center>
+    </BorderPane>
+
+    <!-- Los dos botones de esquina van despues del BorderPane a proposito:
+         un Region con fondo transparente igual intercepta los clics de lo
+         que tiene debajo en JavaFX, asi que deben quedar por encima en el
+         orden de hijos para poder recibir el clic. -->
+    <VBox alignment="CENTER" spacing="2.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
+        <Button fx:id="compassButton" maxHeight="64.0" maxWidth="64.0" minHeight="64.0" minWidth="64.0" onAction="#onToggleVerification" prefHeight="64.0" prefWidth="64.0" styleClass="compass-button" text="&#x1F9ED;">
+            <cursor>
+                <Cursor fx:constant="HAND" />
+            </cursor>
+            <tooltip>
+                <Tooltip text="Ver tablero enemigo (solo antes o despues de jugar) - atajo: V" />
+            </tooltip>
+        </Button>
+        <Label styleClass="key-hint" text="V" />
+    </VBox>
+
+    <VBox alignment="CENTER" spacing="2.0" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="20.0">
+        <Button fx:id="backButton" maxHeight="64.0" maxWidth="64.0" minHeight="64.0" minWidth="64.0" onAction="#onBackToMenu" prefHeight="64.0" prefWidth="64.0" styleClass="compass-button" text="&#x2B05;">
+            <cursor>
+                <Cursor fx:constant="HAND" />
+            </cursor>
+            <tooltip>
+                <Tooltip text="Volver al menu principal (la partida se guarda sola) - atajo: ESC" />
+            </tooltip>
+        </Button>
+        <Label styleClass="key-hint" text="ESC" />
+    </VBox>
+</AnchorPane>

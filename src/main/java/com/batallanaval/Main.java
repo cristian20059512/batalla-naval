@@ -1,5 +1,7 @@
 package com.batallanaval;
 
+import com.batallanaval.util.SoundManager;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -9,8 +11,8 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 /**
- * Punto de entrada de la aplicacion Batalla Naval.
- * Carga la vista principal desde FXML y arranca el ciclo de eventos de JavaFX.
+ * Entry point for the Battleship application.
+ * Loads the main view from FXML and starts the JavaFX event loop.
  */
 public class Main extends Application {
 
@@ -21,6 +23,9 @@ public class Main extends Application {
         Parent root = loader.load();
 
         Scene scene = new Scene(root, 1280, 690);
+        SoundManager.attachButtonSounds(scene);
+        SoundManager.playBackgroundMusic();
+
         stage.setTitle("Batalla Naval");
         stage.setScene(scene);
         stage.setResizable(false);

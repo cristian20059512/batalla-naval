@@ -4,33 +4,33 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Representa la flota completa de un jugador (10 barcos). No conoce nada
- * del tablero; solo agrupa los barcos y responde preguntas de estado
- * agregado, como cuantos siguen a flote.
+ * Represents a player's whole fleet (10 ships). It knows nothing about the
+ * board; it only groups the ships and answers aggregate status questions,
+ * such as how many are still afloat.
  */
 public class Fleet implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final List<Ship> barcos;
+    private final List<Ship> ships;
 
-    public Fleet(List<Ship> barcos) {
-        this.barcos = barcos;
+    public Fleet(List<Ship> ships) {
+        this.ships = ships;
     }
 
-    public List<Ship> getBarcos() {
-        return barcos;
+    public List<Ship> getShips() {
+        return ships;
     }
 
-    public boolean estaCompletamenteHundida() {
-        return barcos.stream().allMatch(Ship::estaHundido);
+    public boolean isCompletelySunk() {
+        return ships.stream().allMatch(Ship::isSunk);
     }
 
-    public long contarBarcosHundidos() {
-        return barcos.stream().filter(Ship::estaHundido).count();
+    public long countSunkShips() {
+        return ships.stream().filter(Ship::isSunk).count();
     }
 
-    public int getTotalBarcos() {
-        return barcos.size();
+    public int getTotalShips() {
+        return ships.size();
     }
 }
