@@ -1,9 +1,9 @@
 package com.batallanaval.util;
 
 /**
- * Guarda datos de sesion que se necesitan pasar de la pantalla inicial
- * (StartController) al tablero de juego (GameController) sin acoplar
- * los dos controladores entre si.
+ * Holds session data that needs to be passed from the start screen
+ * (StartController) to the game board (GameController) without coupling
+ * the two controllers to each other.
  */
 public final class GameSession {
 

@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Jugador de la partida (humano o maquina). Guarda su propio tablero (donde
- * tiene su flota colocada, ya sea el tablero de posicion del humano o el
- * tablero principal de la maquina) y el historial de disparos que ha hecho
- * sobre el tablero del oponente.
+ * A player in the game (human or machine). Holds their own board (where
+ * their fleet is placed, either the human's placement board or the
+ * machine's main board) and the history of shots they have fired at the
+ * opponent's board.
  */
 public abstract class Player implements Serializable {
 

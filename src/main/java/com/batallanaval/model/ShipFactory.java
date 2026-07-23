@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Patron Factory Method: centraliza la creacion de instancias de {@link Ship}
- * segun el {@link ShipType}, evitando esparcir un switch/if-else de
- * instanciacion por todo el codigo de colocacion de flota.
+ * Factory Method pattern: centralizes creating {@link Ship} instances based
+ * on {@link ShipType}, avoiding an instantiation switch/if-else scattered
+ * throughout the fleet placement code.
  */
 public final class ShipFactory {
 
@@ -32,8 +32,9 @@ public final class ShipFactory {
     }
 
     /**
-     * Crea la flota estandar completa (10 barcos, sin posicion asignada
-     * todavia): 1 portaaviones, 2 submarinos, 3 destructores, 4 fragatas.
+     * Creates the complete standard fleet (10 ships, with no position
+     * assigned yet): 1 aircraft carrier, 2 submarines, 3 destroyers,
+     * 4 frigates.
      */
     public static List<Ship> createFullFleet() {
         List<Ship> ships = new ArrayList<>();

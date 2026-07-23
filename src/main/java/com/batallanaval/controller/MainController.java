@@ -18,15 +18,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Controlador de la vista principal (FXML). Su unica responsabilidad es
- * conectar los componentes de la interfaz con el {@link GameController},
- * que contiene toda la logica real de la partida.
+ * Controller for the main view (FXML). Its only responsibility is to
+ * connect the interface components with the {@link GameController}, which
+ * holds all the actual game logic.
  */
 public class MainController {
 
     private static final Logger LOG = Logger.getLogger(MainController.class.getName());
 
-    /** Pseudo-clase CSS que marca la brujula como activa (modo verificacion encendido). */
+    /** CSS pseudo-class that marks the compass as active (verification mode on). */
     private static final PseudoClass VERIFYING = PseudoClass.getPseudoClass("verifying");
 
     @FXML
@@ -84,14 +84,14 @@ public class MainController {
     }
 
     /**
-     * Atajos de teclado: R gira el barco actual, ESPACIO coloca la flota
-     * aleatoria, V alterna la verificacion del tablero enemigo y ESCAPE
-     * vuelve al menu principal. En vez de llamar directo al metodo del
-     * controlador, se dispara el boton (Button.fire()) correspondiente: asi
-     * el atajo se comporta identico al clic con mouse en todo sentido,
-     * incluyendo el sonido (SoundManager engancha el sonido de clic al
-     * ActionEvent del boton, no a la tecla) y el respeto al estado
-     * deshabilitado (fire() no hace nada si el boton esta deshabilitado).
+     * Keyboard shortcuts: R rotates the current ship, SPACE places the
+     * random fleet, V toggles verification of the enemy board, and ESCAPE
+     * goes back to the main menu. Instead of calling the controller's
+     * method directly, the corresponding button is fired (Button.fire()):
+     * this way the shortcut behaves identically to a mouse click in every
+     * respect, including the sound (SoundManager attaches the click sound
+     * to the button's ActionEvent, not to the key) and respecting the
+     * disabled state (fire() does nothing if the button is disabled).
      */
     private void onKeyPressed(KeyEvent event) {
         switch (event.getCode()) {
@@ -120,10 +120,10 @@ public class MainController {
     }
 
     /**
-     * "Salida de emergencia" hacia el menu principal (heuristica de
-     * usabilidad "control y libertad del usuario"): la partida ya se guarda
-     * sola tras cada jugada, asi que el jugador puede salir sin perder
-     * progreso y retomarla despues con "Bitacora de viaje".
+     * "Emergency exit" to the main menu (usability heuristic "user control
+     * and freedom"): the game already autosaves after every move, so the
+     * player can leave without losing progress and resume it later with
+     * "Travel log".
      */
     @FXML
     private void onBackToMenu() {

@@ -1,10 +1,10 @@
 package com.batallanaval.exception;
 
 /**
- * Excepcion marcada (checked): se lanza cuando se intenta colocar un barco
- * fuera del tablero o superpuesto con otro barco ya colocado.
- * Es checked porque el llamador (la vista/controlador) SIEMPRE debe decidir
- * que hacer ante una colocacion invalida, no es un error de programacion.
+ * Checked exception: thrown when trying to place a ship outside the board
+ * or overlapping another ship that is already placed.
+ * It is checked because the caller (the view/controller) must ALWAYS decide
+ * what to do about an invalid placement; it is not a programming error.
  */
 public class InvalidPlacementException extends Exception {
 

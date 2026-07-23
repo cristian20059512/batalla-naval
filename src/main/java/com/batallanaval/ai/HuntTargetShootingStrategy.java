@@ -12,17 +12,16 @@ import java.util.Random;
 import java.util.Set;
 
 /**
- * Estrategia "cazar y rematar": si hay alguna casilla en estado TOCADO
- * (barco dañado pero no hundido todavia), dispara al azar entre las
- * casillas vecinas (arriba/abajo/izquierda/derecha) que aun no se hayan
- * disparado, para intentar hundir ese barco antes de seguir explorando.
- * Si no hay ningun TOCADO pendiente, dispara al azar sobre todo el
- * tablero, igual que {@link RandomShootingStrategy}.
+ * "Hunt and finish" strategy: if there is any cell in the HIT state (a
+ * damaged ship that isn't sunk yet), it fires at random among the
+ * neighboring cells (up/down/left/right) that haven't been fired at yet,
+ * to try to sink that ship before exploring further. If there is no
+ * pending HIT, it fires at random over the whole board, just like
+ * {@link RandomShootingStrategy}.
  *
- * No necesita que le avisen el resultado del disparo anterior: en cada
- * turno vuelve a inspeccionar el tablero, y las casillas TOCADO son
- * exactamente los impactos que todavia no formaron parte de un barco
- * hundido (ver {@link com.batallanaval.model.Board#shoot}).
+ * It doesn't need to be told the previous shot's result: on every turn it
+ * inspects the board again, and the HIT cells are exactly the hits that
+ * are not yet part of a sunk ship (see {@link com.batallanaval.model.Board#shoot}).
  */
 public class HuntTargetShootingStrategy implements ShootingStrategy {
 

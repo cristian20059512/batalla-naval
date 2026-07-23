@@ -6,11 +6,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Punto unico de acceso a la persistencia de la partida. Coordina los dos
- * adaptadores (tablero serializado + resumen en texto plano) para que
- * {@code GameController} guarde/cargue la partida completa con una sola
- * llamada, sin conocer que son dos archivos con dos mecanismos de E/S
- * distintos detras (eso es responsabilidad de cada {@link PersistenceAdapter}).
+ * Single access point for game persistence. Coordinates the two adapters
+ * (serialized board + plain text summary) so {@code GameController} can
+ * save/load the whole game with a single call, without knowing that there
+ * are two files with two different I/O mechanisms behind them (that is
+ * each {@link PersistenceAdapter}'s responsibility).
  */
 public class GamePersistenceManager {
 

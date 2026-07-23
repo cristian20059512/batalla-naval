@@ -1,8 +1,8 @@
 package com.batallanaval.model;
 
 /**
- * Jugador humano. Su tablero propio es el "tablero de posicion": solo
- * observacion, refleja su flota y los disparos que ha recibido.
+ * Human player. Their own board is the "placement board": observation
+ * only, it reflects their fleet and the shots they have received.
  */
 public class HumanPlayer extends Player {
 

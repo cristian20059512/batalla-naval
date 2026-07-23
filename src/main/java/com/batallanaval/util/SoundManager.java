@@ -13,15 +13,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Punto unico para la musica de fondo y los efectos de sonido cortos
- * (hover/clic de botones) de toda la aplicacion. El reproductor de musica
- * es estatico a proposito: debe sobrevivir al cambio de pantalla (menu -&gt;
- * juego -&gt; menu), algo que un MediaPlayer ligado a una sola Scene no
- * podria hacer por si solo.
+ * Single point for the background music and the short sound effects
+ * (button hover/click) of the whole application. The music player is
+ * static on purpose: it must survive switching screens (menu -&gt; game -&gt;
+ * menu), something a MediaPlayer tied to a single Scene could not do on
+ * its own.
  *
- * Si un archivo de audio todavia no existe (por ejemplo, mientras se
- * consiguen los recursos), cada metodo falla en silencio con un aviso en el
- * log: el sonido es un extra, nunca debe impedir que el juego funcione.
+ * If an audio file does not exist yet (for example, while assets are still
+ * being gathered), each method fails silently with a log warning: sound is
+ * an extra, it must never keep the game from working.
  */
 public final class SoundManager {
 
@@ -35,7 +35,7 @@ public final class SoundManager {
     private SoundManager() {
     }
 
-    /** Arranca la musica de fondo en bucle (volumen bajo, para no tapar los efectos). Es un no-op si ya estaba sonando. */
+    /** Starts the background music on loop (low volume, so it doesn't drown out the effects). No-op if it was already playing. */
     public static void playBackgroundMusic() {
         if (musicPlayer != null) {
             return;
@@ -52,10 +52,10 @@ public final class SoundManager {
     }
 
     /**
-     * Engancha el sonido de hover y de clic a cualquier {@link Button} de la
-     * Scene dada, sin tener que tocar cada boton del FXML uno por uno: un
-     * solo filtro de eventos a nivel de Scene basta para los botones
-     * presentes y los que se agreguen despues.
+     * Attaches the hover and click sounds to any {@link Button} in the given
+     * Scene, without having to touch every button in the FXML one by one: a
+     * single Scene-level event filter is enough for the buttons already
+     * present and the ones added later.
      */
     public static void attachButtonSounds(Scene scene) {
         scene.addEventFilter(MouseEvent.MOUSE_ENTERED_TARGET, event -> {

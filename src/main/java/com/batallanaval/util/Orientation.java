@@ -3,10 +3,10 @@ package com.batallanaval.util;
 import java.io.Serializable;
 
 /**
- * Direccion en la que un barco se extiende desde la casilla donde el
- * jugador hace clic (esa casilla es siempre la proa). Las 4 direcciones
- * cardinales permiten colocar el barco apuntando hacia cualquiera de los
- * 4 lados, sin introducir diagonales (que el enunciado no contempla).
+ * Direction a ship extends from the cell the player clicks on (that cell is
+ * always the bow). The 4 cardinal directions allow placing the ship pointing
+ * to any of the 4 sides, without introducing diagonals (which the
+ * assignment does not call for).
  */
 public enum Orientation implements Serializable {
     RIGHT,

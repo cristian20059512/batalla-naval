@@ -8,25 +8,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Genera un segmento de casco de barco "low poly" facetado (sin imagenes,
- * solo caras planas) como una malla de triangulos hecha a mano con
- * {@link TriangleMesh}: un "tubo" con seccion transversal pentagonal
- * (quilla en V, costados que se abren hacia la cubierta) entre dos anillos,
- * uno en cada extremo del segmento. Si el ancho de un extremo es (casi)
- * cero, ese anillo colapsa en una arista vertical angosta en vez de un
- * punto matematico exacto - el efecto visual es una proa/popa en punta,
- * igual que la roda de un barco real.
+ * Generates a faceted "low poly" ship hull segment (no images, only flat
+ * faces) as a hand-built {@link TriangleMesh}: a "tube" with a pentagonal
+ * cross-section (V-shaped keel, sides opening up toward the deck) between
+ * two rings, one at each end of the segment. If an end's width is (almost)
+ * zero, that ring collapses into a narrow vertical edge instead of an
+ * exact mathematical point - the visual effect is a pointed bow/stern,
+ * just like a real ship's stem.
  *
- * Se arma por segmento (no un barco entero de una pieza) para poder seguir
- * revelando solo la parte tocada de un barco cuando recibe un disparo
- * (HU-2: "aparecera esa parte del barco"), en vez de todo el barco de
- * golpe: cada celda del barco sigue siendo su propio segmento, igual que
- * en la version con Box, solo que ahora con una seccion transversal
- * facetada en vez de una caja lisa.
+ * It is built per segment (not a whole ship in one piece) so it can keep
+ * revealing only the part of a ship that was hit when it takes a shot
+ * (HU-2: "that part of the ship will appear"), instead of the whole ship
+ * at once: each cell of the ship stays its own segment, just like in the
+ * Box version, only now with a faceted cross-section instead of a plain
+ * box.
  *
- * El eje X local es el largo del segmento (dos anillos, uno en -length/2 y
- * otro en +length/2), Y es altura (Y+ hacia abajo, como en toda la escena)
- * y Z es el ancho (babor/estribor).
+ * The local X axis is the segment's length (two rings, one at -length/2
+ * and another at +length/2), Y is height (Y+ downward, as in the whole
+ * scene), and Z is width (port/starboard).
  */
 public final class HullMeshBuilder {
 
@@ -36,14 +35,14 @@ public final class HullMeshBuilder {
     }
 
     /**
-     * capStart/capEnd controlan si cada extremo se tapa con un abanico de
-     * triangulos o se deja abierto. Solo hay que tapar la punta REAL del
-     * barco (la proa del primer segmento, la popa del ultimo); el lado que
-     * conecta con el siguiente segmento (ver HULL_BRIDGE en Board3DView) no
-     * se tapa, porque ese anillo es identico (misma X, mismo ancho) al
-     * anillo con el que arranca el segmento vecino, y las dos tapas
-     * superpuestas en el mismo plano hacian z-fighting (un mordisco/muesca
-     * parpadeante justo en la union, en vez de un casco de una sola pieza).
+     * capStart/capEnd control whether each end is closed off with a
+     * triangle fan or left open. Only the ship's ACTUAL tip needs to be
+     * capped (the first segment's bow, the last one's stern); the side
+     * that connects to the next segment (see HULL_BRIDGE in Board3DView)
+     * is not capped, because that ring is identical (same X, same width)
+     * to the ring the neighboring segment starts with, and the two caps
+     * overlapping on the same plane caused z-fighting (a flickering
+     * notch/bite right at the joint, instead of a single-piece hull).
      */
     public static MeshView buildSegment(double length, double startHalfWidth, double endHalfWidth,
                                          double deckY, double keelY, boolean capStart, boolean capEnd) {
@@ -74,7 +73,7 @@ public final class HullMeshBuilder {
         return p;
     }
 
-    /** Anillo de 5 puntos en X fijo: quilla, inferior-derecha, cubierta-derecha, cubierta-izquierda, inferior-izquierda. */
+    /** Ring of 5 points at a fixed X: keel, lower-right, deck-right, deck-left, lower-left. */
     private static int putRing(float[] points, int p, double x, double halfWidth, double deckY, double keelY) {
         double midY = keelY * 0.35;
         p = putPoint(points, p, x, keelY, 0);
@@ -86,11 +85,11 @@ public final class HullMeshBuilder {
     }
 
     /**
-     * Indices de vertices: 0-4 = anillo de inicio, 5-9 = anillo de fin.
-     * Ademas de las caras laterales (el "tubo" entre los dos anillos), el
-     * extremo pedido se cierra con un abanico de triangulos (tapa) para que
-     * no se vea "a traves" del casco mirando casi de frente a la proa o la
-     * popa (angulo de camara bajo + zoom).
+     * Vertex indices: 0-4 = start ring, 5-9 = end ring. Besides the side
+     * faces (the "tube" between the two rings), the requested end is
+     * closed off with a triangle fan (cap) so the hull cannot be seen
+     * "through" when looking almost straight at the bow or stern (low
+     * camera angle + zoom).
      */
     private static int[] buildFaces(boolean capStart, boolean capEnd) {
         List<int[]> triangles = new ArrayList<>();

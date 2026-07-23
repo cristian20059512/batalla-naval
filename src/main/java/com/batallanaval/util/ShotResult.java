@@ -3,7 +3,7 @@ package com.batallanaval.util;
 import java.io.Serializable;
 
 /**
- * Resultado inmediato de haber disparado sobre una coordenada del tablero.
+ * Immediate result of firing at a coordinate on the board.
  */
 public enum ShotResult implements Serializable {
     WATER,

@@ -3,8 +3,8 @@ package com.batallanaval.util;
 import java.io.Serializable;
 
 /**
- * Tipos de barco definidos por el enunciado, con el tamano (numero de
- * casillas que ocupa) y la cantidad de unidades que tiene cada flota.
+ * Ship types defined by the assignment, with the size (number of cells it
+ * occupies) and how many units of it each fleet has.
  */
 public enum ShipType implements Serializable {
     AIRCRAFT_CARRIER(4, 1),

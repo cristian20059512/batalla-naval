@@ -8,11 +8,10 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Coloca una flota completa de 10 barcos en un tablero de forma aleatoria,
- * respetando las reglas de HU-1 (sin superposicion, dentro del tablero).
- * Se usa para generar automaticamente el tablero principal de la maquina
- * (HU-4), y tambien sirve como atajo si el humano quiere "colocacion
- * aleatoria" en su propio tablero de posicion.
+ * Places a complete fleet of 10 ships on a board at random, respecting
+ * HU-1's rules (no overlap, within the board). Used to automatically
+ * generate the machine's main board (HU-4), and also works as a shortcut
+ * if the human wants "random placement" on their own placement board.
  */
 public final class RandomFleetPlacer {
 
@@ -31,13 +30,12 @@ public final class RandomFleetPlacer {
     }
 
     /**
-     * Coloca al azar, sin superposicion ni salirse del tablero, cada barco
-     * de la lista dada. A diferencia de {@link #placeRandomFleet(Board)},
-     * no crea una flota desde cero ni reemplaza el {@code Fleet} del
-     * tablero: sirve para completar solo los barcos que todavia falten
-     * cuando parte de la flota ya se coloco a mano (si no, "Colocar flota
-     * aleatoria" terminaria agregando 10 barcos nuevos encima de los que ya
-     * estaban puestos).
+     * Places each ship in the given list at random, without overlapping or
+     * going outside the board. Unlike {@link #placeRandomFleet(Board)}, it
+     * does not create a fleet from scratch nor replace the board's
+     * {@code Fleet}: it only fills in the ships still missing when part of
+     * the fleet was already placed by hand (otherwise, "Place random fleet"
+     * would end up adding 10 new ships on top of the ones already placed).
      */
     public static void placeShipsRandomly(Board board, List<Ship> ships) {
         Random random = new Random();

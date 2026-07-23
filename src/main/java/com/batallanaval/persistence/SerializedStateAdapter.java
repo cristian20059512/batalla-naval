@@ -11,12 +11,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Adaptador (patron Adapter) que expone el guardado del estado de los
- * tableros a traves de {@link PersistenceAdapter}, delegando en la API
- * nativa de serializacion de Java ({@link ObjectOutputStream} /
- * {@link ObjectInputStream}). El resto de la aplicacion solo conoce el
- * contrato {@code save/load}; el detalle de que esto es un archivo
- * binario serializado queda encapsulado aqui.
+ * Adapter (Adapter pattern) that exposes saving the boards' state through
+ * {@link PersistenceAdapter}, delegating to Java's native serialization API
+ * ({@link ObjectOutputStream} / {@link ObjectInputStream}). The rest of the
+ * application only knows the {@code save/load} contract; the detail that
+ * this is a serialized binary file stays encapsulated here.
  */
 public class SerializedStateAdapter implements PersistenceAdapter<GameState> {
 

@@ -6,9 +6,9 @@ import com.batallanaval.util.ShotResult;
 import java.io.Serializable;
 
 /**
- * Registro inmutable de un disparo ya realizado: donde y con que resultado.
- * Se usa para el historial de la partida y para que la IA de la maquina
- * sepa que casillas ya intento.
+ * Immutable record of a shot already taken: where, and with what result.
+ * Used for the game's history and so the machine's AI knows which cells
+ * it has already tried.
  */
 public class Shot implements Serializable {
 

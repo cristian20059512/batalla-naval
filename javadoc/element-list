@@ -1,0 +1,9 @@
+module:com.batallanaval
+com.batallanaval
+com.batallanaval.ai
+com.batallanaval.controller
+com.batallanaval.exception
+com.batallanaval.model
+com.batallanaval.persistence
+com.batallanaval.util
+com.batallanaval.view

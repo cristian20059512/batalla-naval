@@ -21,9 +21,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Controlador de la pantalla inicial (FXML): pide el nickname del jugador
- * y ofrece "Jugar" (partida nueva) o "Continuar" (retoma la ultima partida
- * guardada, ver {@link GamePersistenceManager}).
+ * Controller for the start screen (FXML): asks for the player's nickname
+ * and offers "Play" (new game) or "Continue" (resumes the last saved game,
+ * see {@link GamePersistenceManager}).
  */
 public class StartController {
 
@@ -40,7 +40,7 @@ public class StartController {
 
     private final GamePersistenceManager persistenceManager = new GamePersistenceManager();
 
-    /** Nickname con el que se guardo la ultima partida, o null si no hay ninguna (o no se pudo leer). */
+    /** Nickname the last game was saved with, or null if there is none (or it couldn't be read). */
     private String savedNickname;
 
     @FXML
@@ -58,9 +58,9 @@ public class StartController {
     }
 
     /**
-     * "Continuar" solo se habilita si el nombre escrito coincide con el
-     * nickname de la partida guardada (para no cargar por error/trampa la
-     * partida de otra persona que haya jugado antes en el mismo equipo).
+     * "Continue" is only enabled if the typed name matches the saved
+     * game's nickname (so that another person's game, played earlier on
+     * the same team, isn't loaded by mistake or on purpose).
      */
     private void updateContinueAvailability() {
         boolean matches = savedNickname != null
@@ -96,9 +96,9 @@ public class StartController {
     }
 
     /**
-     * Muestra las instrucciones del juego (heuristica de usabilidad "ayuda
-     * y documentacion"): reglas basicas, terminologia y atajos de teclado,
-     * para que el jugador no tenga que adivinarlos por prueba y error.
+     * Shows the game instructions (usability heuristic "help and
+     * documentation"): basic rules, terminology, and keyboard shortcuts, so
+     * the player doesn't have to guess them by trial and error.
      */
     @FXML
     private void onOptions() {
