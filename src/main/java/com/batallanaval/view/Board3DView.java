@@ -32,8 +32,7 @@ import java.util.Random;
 import java.util.function.Consumer;
 
 /**
- * 3D visual representation of a {@link Board} (replaces the 2D version,
- * {@link BoardView}, which is left in the project unused). Each cell is a
+ * 3D visual representation of a {@link Board}. Each cell is a
  * plate (Box) on the XZ plane; ships are groups of Box, Cylinder, and
  * Sphere positioned and rotated in space; a PerspectiveCamera and a couple
  * of lights (AmbientLight + PointLight) make them visible, following the
@@ -42,9 +41,9 @@ import java.util.function.Consumer;
  * and can therefore be inserted into the rest of the application's 2D
  * layout (FXML) without changing anything else there.
  *
- * It registers as a {@link BoardListener} just like the 2D version, to
- * automatically repaint the cell that changed without the model knowing
- * anything about JavaFX (Observer).
+ * It registers as a {@link BoardListener} to automatically repaint the
+ * cell that changed without the model knowing anything about JavaFX
+ * (Observer).
  *
  * If this is the own (placement) board, it always shows the ships. If it
  * is the opponent's board, ships stay hidden until they are hit/sunk,
