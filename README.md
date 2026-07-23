@@ -1,3 +1,6 @@
+## Integrantes
+
+- Cristian Camilo Criollo- 2517199 (`cristian20059512`) 
 # Batalla Naval
 
 Mini proyecto académico: el clásico juego de Batalla Naval, jugado contra una
@@ -89,6 +92,4 @@ mvn test
     muestra las reglas del juego, la terminología (agua/tocado/hundido) y
     los atajos de teclado disponibles.
 
-## Integrantes
 
-- Cristian Camilo Criollo (`cristian20059512`)
