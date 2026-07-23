@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.batallanaval.controller.GameOverController"
+           stylesheets="@main-view.css"
+           style="-fx-background-color: radial-gradient(center 30% 20%, radius 100%, #3A2A18, #1C130B 70%);">
+    <VBox alignment="CENTER" spacing="18" styleClass="board-frame" maxWidth="320" maxHeight="220">
+        <Label fx:id="titleLabel" styleClass="title-text" text="¡Ganaste!" />
+        <Label fx:id="messageLabel" styleClass="subtle-text" wrapText="true" textAlignment="CENTER"
+               text="Mensaje" />
+        <Button fx:id="backButton" styleClass="wood-button" text="Volver al menu" onAction="#onBackToMenu" />
+    </VBox>
+</StackPane>

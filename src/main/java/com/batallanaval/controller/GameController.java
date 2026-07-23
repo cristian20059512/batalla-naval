@@ -23,12 +23,18 @@ import com.batallanaval.util.ShotResult;
 import com.batallanaval.util.GameSession;
 import com.batallanaval.util.ShipType;
 import com.batallanaval.util.GameTurn;
+import com.batallanaval.util.SoundManager;
 import com.batallanaval.view.Board3DView;
 
 import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -430,7 +436,7 @@ public class GameController {
             statusLabel.setText("Disparaste en " + coordinate + ": " + result);
 
             if (machineMainBoard.isFleetFullySunk()) {
-                endGame("Hundiste toda la flota enemiga. Ganaste.");
+                endGame("Hundiste toda la flota enemiga. Ganaste.", true);
                 return;
             }
 
@@ -452,7 +458,7 @@ public class GameController {
         statusLabel.setText("La maquina disparo en " + target + ": " + result);
 
         if (humanPositionBoard.isFleetFullySunk()) {
-            endGame("La maquina hundio toda tu flota. Perdiste.");
+            endGame("La maquina hundio toda tu flota. Perdiste.", false);
             return;
         }
 
@@ -487,11 +493,37 @@ public class GameController {
         turnThread.start();
     }
 
-    private void endGame(String message) {
+    private void endGame(String message, boolean won) {
         phase = GamePhase.FINISHED;
         statusLabel.setText(message);
         onVerificationAvailabilityChanged.accept(canVerify());
         gameClock.stop();
         autoSave();
+        showGameOverDialog(message, won);
+    }
+
+    /**
+     * Pantalla de fin de partida (ademas del statusLabel, que solo cambia
+     * un texto discreto que podria pasar desapercibido): confirma de forma
+     * clara e inequivoca que la partida termino y si se gano o se perdio,
+     * reemplazando la escena del tablero por completo (no una ventana
+     * flotante encima) para que el unico camino de vuelta sea su propio
+     * boton "Volver al menu" (GameOverController), igual que cualquier
+     * otra transicion de pantalla en la aplicacion.
+     */
+    private void showGameOverDialog(String message, boolean won) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/batallanaval/view/game-over-view.fxml"));
+            Parent root = loader.load();
+            GameOverController controller = loader.getController();
+            controller.setContent(won ? "¡Ganaste!" : "Perdiste", message);
+
+            Stage stage = (Stage) statusLabel.getScene().getWindow();
+            Scene scene = new Scene(root, 1320, 880);
+            SoundManager.attachButtonSounds(scene);
+            stage.setScene(scene);
+        } catch (IOException e) {
+            LOG.log(Level.SEVERE, "No se pudo mostrar la pantalla de fin de partida.", e);
+        }
     }
 }
