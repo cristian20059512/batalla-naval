@@ -88,7 +88,7 @@
     </VBox>
 
     <VBox alignment="CENTER" spacing="2.0" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="20.0">
-        <Button maxHeight="64.0" maxWidth="64.0" minHeight="64.0" minWidth="64.0" onAction="#onBackToMenu" prefHeight="64.0" prefWidth="64.0" styleClass="compass-button" text="&#x2B05;">
+        <Button fx:id="backButton" maxHeight="64.0" maxWidth="64.0" minHeight="64.0" minWidth="64.0" onAction="#onBackToMenu" prefHeight="64.0" prefWidth="64.0" styleClass="compass-button" text="&#x2B05;">
             <cursor>
                 <Cursor fx:constant="HAND" />
             </cursor>
